@@ -1,0 +1,18 @@
+{
+  "functions": {
+    "api/**/*.js": {
+      "maxDuration": 30
+    }
+  },
+  "rewrites": [
+    { "source": "/api/case-search", "destination": "/api/jcase-search" },
+    { "source": "/api/admin/login", "destination": "/api/admin/jlogin" },
+    { "source": "/api/admin/logout", "destination": "/api/admin/jlogout" },
+    { "source": "/api/admin/session", "destination": "/api/admin/jsession" },
+    { "source": "/api/admin/data", "destination": "/api/admin/jdata" },
+    { "source": "/api/admin/profile", "destination": "/api/admin/jprofile" },
+    { "source": "/api/admin/records", "destination": "/api/admin/jrecords" },
+    { "source": "/api/admin/photos", "destination": "/api/admin/jphotos" },
+    { "source": "/api/admin/upload-image", "destination": "/api/admin/jupload-image" }
+  ]
+}
