@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>線上報案 - 警察庁</title>
+  <style>
+    :root { --ink:#2d2d2d; --paper:#f6f7f8; --muted:#667085; --line:#d8dee8; --nav:#183a5d; --nav-soft:#e7edf5; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; color:var(--ink); background:var(--paper); font-family:"Noto Sans TC","Microsoft JhengHei",sans-serif; }
+    a { color:inherit; text-decoration:none; }
+    .site-header { background:#fff; border-bottom:1px solid #cfd8e4; }
+    .head-tools { border-bottom:1px solid #e9edf3; background:#fff; }
+    .head-tools-inner, .masthead, .nav-inner, .hero, main, .site-footer-inner { width:min(1220px, calc(100% - 32px)); margin:auto; }
+    .head-tools-inner { min-height:56px; display:flex; justify-content:flex-end; align-items:center; gap:16px; color:#334155; font-size:14px; }
+    .head-tools-inner a { color:#334155; }
+    .head-tools-inner a:hover { text-decoration:underline; }
+    .head-divider { color:#9aa4b2; }
+    .tool-search { border:0; border-bottom:2px solid #222; min-height:32px; width:220px; font-size:14px; padding:4px 6px; }
+    .masthead { min-height:104px; display:flex; align-items:center; justify-content:space-between; gap:14px; }
+    .identity { display:block; min-width:0; flex:1; }
+    .brand-left { width:100%; max-width:320px; height:auto; display:block; }
+    .return-home { border:1px solid #bcc8d8; border-radius:4px; color:#284565; padding:7px 12px; font-size:13px; }
+    .nav-bar { background:#fff; border-top:1px solid #e6ecf4; border-bottom:4px solid var(--nav); }
+    .nav-inner { display:flex; justify-content:space-between; align-items:flex-end; gap:8px; }
+    .nav-inner a { color:#2f3a46; min-width:0; flex:1; white-space:nowrap; padding:18px 10px 14px; text-align:center; font-weight:700; font-size:18px; letter-spacing:.02em; border-bottom:4px solid transparent; margin-bottom:-4px; }
+    .nav-inner a:hover, .nav-inner a.active { border-bottom-color:var(--nav); color:#1b3554; background:var(--nav-soft); }
+    main { min-height:670px; padding:30px 0 70px; }
+    .service-panel { width:min(560px, 100%); margin:0 auto; background:#fff; border:1px solid #dae3ef; border-top:4px solid var(--nav); border-radius:8px; box-shadow:0 6px 18px #0f172a14; padding:24px 28px 28px; }
+    .service-panel h1 { margin:0; color:#1b3554; text-align:center; font-size:24px; letter-spacing:.06em; }
+    .intro { margin:8px 0 24px; color:#7b8798; text-align:center; font-size:13px; }
+    label { display:block; margin:15px 0 6px; color:#4b5563; font-size:14px; font-weight:700; }
+    input { width:100%; min-height:44px; padding:10px 12px; border:1px solid #b7c3d4; border-radius:4px; color:#333; font:14px "Noto Sans TC","Microsoft JhengHei",sans-serif; background:#fff; box-shadow:inset 0 1px 3px #0000000d; }
+    input:focus { outline:2px solid #1d4a7b33; border-color:var(--nav); }
+    .submit { width:100%; min-height:46px; margin-top:22px; border:0; border-radius:4px; color:#fff; background:var(--nav); box-shadow:0 2px 6px #12335433; font:700 16px "Noto Sans TC","Microsoft JhengHei",sans-serif; letter-spacing:8px; text-indent:8px; cursor:pointer; }
+    .submit:hover { background:#102b46; }
+    .result { display:none; margin-top:16px; padding:10px 12px; border-left:3px solid #18864a; background:#edf9f1; color:#23633e; font-size:13px; line-height:1.6; }
+    .result.show { display:block; }
+    .result.error { border-color:#cd8a19; background:#fff8e7; color:#835812; }
+    .callout { margin-top:18px; padding:12px 14px; border:1px solid #dce3ee; border-radius:6px; background:#f8fbff; color:#4b5563; font-size:13px; line-height:1.7; }
+    .site-footer { background:#f0f3f7; border-top:1px solid #dde4ee; color:#667085; }
+    .site-footer-inner { padding:17px 0; font-size:12px; text-align:center; }
+    @media (max-width:900px) {
+      .head-tools-inner { min-height:46px; gap:10px; font-size:12px; }
+      .tool-search { width:120px; }
+      .masthead { min-height:82px; }
+      .brand-left { max-width:240px; }
+      .return-home { padding:5px 8px; font-size:12px; }
+      .nav-inner { overflow:auto; justify-content:flex-start; }
+      .nav-inner a { min-width:auto; white-space:nowrap; padding:12px 16px; font-size:14px; margin-bottom:0; border-bottom-width:3px; }
+      main { padding-top:24px; }
+      .service-panel { padding:22px 20px 24px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="head-tools"><div class="head-tools-inner">
+      <a href="jzz.html">English</a><span class="head-divider">›</span><a href="jzz.html">国家公安委員会</a><span class="head-divider">›</span><a href="jzz.html">サイトマップ</a>
+      <input class="tool-search" type="text" aria-label="Google 提供検索" placeholder="Google 提供">
+    </div></div>
+    <div class="masthead">
+      <a class="identity" href="jzz.html" aria-label="返回首頁">
+        <img class="brand-left" src="https://www.npa.go.jp/common2/img/logo.svg" alt="警察庁">
+      </a>
+      <a class="return-home" href="jzz.html">← 戻る</a>
+    </div>
+    <nav class="nav-bar"><div class="nav-inner">
+      <a href="jzz.html">警察庁トップ</a><a href="jcase-search.html">案件查詢</a><a class="active" href="jmm1.html">線上報案</a>
+    </div></nav>
+  </header>
+
+  <main>
+    <form id="reportForm" class="service-panel">
+      <h1>線上報案</h1>
+      <p class="intro">填入單位名稱與中文預設代碼後，即可進入視訊報案功能。</p>
+      <label for="unitName">單位名稱</label>
+      <input id="unitName" required maxlength="40" placeholder="例如：刑事警察大隊">
+      <label for="entryCode">後端預設代碼（中文）</label>
+      <input id="entryCode" required maxlength="20" placeholder="請輸入：警民視訊接入" value="警民視訊接入">
+      <div class="callout">預設代碼：<strong>警民視訊接入</strong>。輸入正確後，系統會自動跳轉到視訊後台頁。</div>
+      <button class="submit" type="submit">進 入 視 訊</button>
+      <div id="reportResult" class="result" aria-live="polite"></div>
+    </form>
+  </main>
+
+  <footer class="site-footer"><div class="site-footer-inner">線上報案採用中文代碼驗證，完成後會導向視訊功能頁。</div></footer>
+
+  <script>
+    const form = document.querySelector('#reportForm');
+    const unitName = document.querySelector('#unitName');
+    const entryCode = document.querySelector('#entryCode');
+    const result = document.querySelector('#reportResult');
+    const presetCode = '警民視訊接入';
+
+    function show(text, error) {
+      result.textContent = text;
+      result.className = 'result show' + (error ? ' error' : '');
+    }
+
+    // 忽略空白與常見標點，降低中文輸入法造成的比對失敗。
+    function normalizeCode(value) {
+      return value.replace(/\s+/g, '').replace(/[，。、「」『』,.]/g, '');
+    }
+
+    entryCode.value = presetCode;
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const unit = unitName.value.trim();
+      const code = entryCode.value.trim();
+
+      if (!unit || !code) {
+        show('請先填寫單位名稱與中文代碼。', true);
+        return;
+      }
+
+      if (normalizeCode(code) !== normalizeCode(presetCode)) {
+        show('代碼錯誤，請輸入「警民視訊接入」。', true);
+        return;
+      }
+
+      const target = 'jvideo-room.html?unit=' + encodeURIComponent(unit) + '&code=' + encodeURIComponent(code);
+      show('驗證成功，正在進入視訊功能...', false);
+      setTimeout(() => { window.location.href = target; }, 500);
+    });
+  </script>
+</body>
+</html>
