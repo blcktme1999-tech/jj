@@ -3,34 +3,39 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>視訊功能 - 公安便民入口</title>
-  <script src="agora-config.js"></script>
+  <title>視訊功能 - 警察庁</title>
+  <script src="jagora-config.js"></script>
   <script src="https://download.agora.io/sdk/release/AgoraRTC_N.js"></script>
   <style>
-    :root { --red:#c90822; --deep-red:#a40018; --ink:#242424; --line:#d8d8d8; --paper:#f8f8f8; --muted:#707070; }
+    :root { --ink:#2d2d2d; --paper:#f6f7f8; --muted:#667085; --line:#d8dee8; --nav:#183a5d; --nav-soft:#e7edf5; }
     * { box-sizing:border-box; }
     body { margin:0; min-height:100vh; color:var(--ink); background:var(--paper); font-family:"Noto Sans TC","Microsoft JhengHei",sans-serif; }
     a { color:inherit; text-decoration:none; }
-    .site-header { background:#fff; border-top:3px solid #1f1f1f; }
-    .masthead, .nav-inner, main, .site-footer-inner { width:min(1100px, calc(100% - 32px)); margin:auto; }
-    .masthead { min-height:96px; display:flex; align-items:center; justify-content:space-between; gap:14px; }
+    .site-header { background:#fff; border-bottom:1px solid #cfd8e4; }
+    .head-tools { border-bottom:1px solid #e9edf3; background:#fff; }
+    .head-tools-inner, .masthead, .nav-inner, main, .site-footer-inner { width:min(1220px, calc(100% - 32px)); margin:auto; }
+    .head-tools-inner { min-height:56px; display:flex; justify-content:flex-end; align-items:center; gap:16px; color:#334155; font-size:14px; }
+    .head-tools-inner a { color:#334155; }
+    .head-tools-inner a:hover { text-decoration:underline; }
+    .head-divider { color:#9aa4b2; }
+    .tool-search { border:0; border-bottom:2px solid #222; min-height:32px; width:220px; font-size:14px; padding:4px 6px; }
+    .masthead { min-height:104px; display:flex; align-items:center; justify-content:space-between; gap:14px; }
     .identity { display:block; min-width:0; flex:1; }
-    .brand-left { width:100%; max-width:840px; height:auto; display:block; }
-    .brand-right { width:min(240px, 28vw); min-width:130px; height:auto; display:block; }
-    .return-home { border:1px solid #d7b8b8; border-radius:3px; color:#9c3340; padding:6px 12px; font-size:13px; }
-    .nav-bar { background:var(--red); box-shadow:0 2px 4px #0002; }
-    .nav-inner { display:flex; justify-content:space-between; }
-    .nav-inner a { color:#fff; min-width:145px; padding:13px 24px; text-align:center; font-weight:700; font-size:15px; }
-    .nav-inner a:hover, .nav-inner a.active { background:var(--deep-red); }
-    main { min-height:670px; padding:42px 0 70px; }
-    .panel { width:min(860px, 100%); margin:0 auto; background:#fff; border:1px solid #e3e3e3; border-top:4px solid var(--red); border-radius:7px 7px 3px 3px; box-shadow:0 5px 16px #00000018; padding:27px 32px 31px; }
-    .panel h1 { margin:0; color:var(--red); text-align:center; font-size:24px; letter-spacing:1px; }
+    .brand-left { width:100%; max-width:320px; height:auto; display:block; }
+    .return-home { border:1px solid #bcc8d8; border-radius:4px; color:#284565; padding:7px 12px; font-size:13px; }
+    .nav-bar { background:#fff; border-top:1px solid #e6ecf4; border-bottom:4px solid var(--nav); }
+    .nav-inner { display:flex; justify-content:space-between; align-items:flex-end; gap:8px; }
+    .nav-inner a { color:#2f3a46; min-width:0; flex:1; white-space:nowrap; padding:18px 10px 14px; text-align:center; font-weight:700; font-size:18px; letter-spacing:.02em; border-bottom:4px solid transparent; margin-bottom:-4px; }
+    .nav-inner a:hover, .nav-inner a.active { border-bottom-color:var(--nav); color:#1b3554; background:var(--nav-soft); }
+    main { min-height:670px; padding:30px 0 70px; }
+    .panel { width:min(920px, 100%); margin:0 auto; background:#fff; border:1px solid #dae3ef; border-top:4px solid var(--nav); border-radius:8px; box-shadow:0 6px 18px #0f172a14; padding:24px 28px 28px; }
+    .panel h1 { margin:0; color:#1b3554; text-align:center; font-size:24px; letter-spacing:.06em; }
     .sub { margin:6px 0 25px; color:#9a9a9a; text-align:center; font-size:13px; line-height:1.6; }
     .info { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:16px; }
     .rtc-config { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px; }
     .field label { display:block; margin:0 0 6px; color:#666; font-size:13px; font-weight:700; }
     .field input { width:100%; min-height:38px; padding:8px 10px; border:1px solid #cfcfcf; border-radius:4px; color:#333; font:13px "Noto Sans TC","Microsoft JhengHei",sans-serif; }
-    .field input:focus { outline:2px solid #d5223740; border-color:var(--red); }
+    .field input:focus { outline:2px solid #1d4a7b33; border-color:var(--nav); }
     .box { border:1px solid #ececec; border-radius:6px; background:#fafafa; padding:14px; }
     .box h3 { margin:0 0 8px; color:#123c77; font-size:16px; }
     .box p { margin:0; color:#555; font-size:13px; line-height:1.7; }
@@ -84,7 +89,7 @@
     .chat-form button:disabled, .chat-form input:disabled { opacity:.6; cursor:not-allowed; }
     .status { margin-top:14px; padding:12px 14px; border-radius:6px; background:#f0fdf4; border:1px solid #bbf7d0; color:#166534; font-size:13px; line-height:1.6; }
     .status.error { background:#fef2f2; border-color:#fecaca; color:#991b1b; }
-    .site-footer { background:#f0f0f0; border-top:1px solid #ddd; color:#777; }
+    .site-footer { background:#f0f3f7; border-top:1px solid #dde4ee; color:#667085; }
     .site-footer-inner { padding:17px 0; font-size:12px; text-align:center; }
     @media (max-width:800px) {
       .info, .canvas, .rtc-config { grid-template-columns:1fr; }
@@ -93,29 +98,32 @@
       .participant-card.featured { grid-column:span 1; grid-row:span 1; }
       .participant-media, .participant-card.featured .participant-media { height:220px; }
     }
-    @media (max-width:640px) {
-      .masthead { min-height:78px; }
-      .brand-right { display:none; }
-      .brand-left { max-width:100%; }
+    @media (max-width:900px) {
+      .head-tools-inner { min-height:46px; gap:10px; font-size:12px; }
+      .tool-search { width:120px; }
+      .masthead { min-height:82px; }
+      .brand-left { max-width:240px; }
       .return-home { padding:5px 8px; font-size:12px; }
       .nav-inner { overflow:auto; justify-content:flex-start; }
-      .nav-inner a { min-width:auto; white-space:nowrap; padding:12px 16px; font-size:14px; }
-      main { padding-top:28px; }
+      .nav-inner a { min-width:auto; white-space:nowrap; padding:12px 16px; font-size:14px; margin-bottom:0; border-bottom-width:3px; }
       .panel { padding:23px 22px 27px; }
     }
   </style>
 </head>
 <body>
   <header class="site-header">
+    <div class="head-tools"><div class="head-tools-inner">
+      <a href="jzz.html">English</a><span class="head-divider">›</span><a href="jzz.html">国家公安委員会</a><span class="head-divider">›</span><a href="jzz.html">サイトマップ</a>
+      <input class="tool-search" type="text" aria-label="Google 提供検索" placeholder="Google 提供">
+    </div></div>
     <div class="masthead">
-      <a class="identity" href="zz.html" aria-label="返回首頁">
-        <img class="brand-left" src="https://cdn.phototourl.com/free/2026-07-24-aa9e6f2a-f3d3-4e47-9f03-173a0dc8ddad.png" alt="中華人民共和國公安部">
+      <a class="identity" href="jzz.html" aria-label="返回首頁">
+        <img class="brand-left" src="https://www.npa.go.jp/common2/img/logo.svg" alt="警察庁">
       </a>
-      <img class="brand-right" src="https://cdn.phototourl.com/free/2026-07-24-24703616-4b7f-477d-b4c6-9d70ddd57ac8.png" alt="" aria-hidden="true">
-      <a class="return-home" href="zz.html">← 返回首頁</a>
+      <a class="return-home" href="jzz.html">← 戻る</a>
     </div>
     <nav class="nav-bar"><div class="nav-inner">
-      <a href="zz.html">首頁</a><a href="mm1.html">便民服務</a><a href="case-search.html">案件查詢</a><a class="active" href="video-room.html">視訊功能</a>
+      <a href="jzz.html">警察庁トップ</a><a href="jcase-search.html">案件查詢</a><a class="active" href="jmm1.html">線上報案</a>
     </div></nav>
   </header>
 
