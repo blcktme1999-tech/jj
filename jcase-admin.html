@@ -1,0 +1,751 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>案件後台管理 - 公安便民入口</title>
+  <style>
+    :root { --ink:#2d2d2d; --paper:#f6f7f8; --muted:#667085; --line:#d8dee8; --nav:#183a5d; --nav-soft:#e7edf5; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; color:var(--ink); background:var(--paper); font-family:"Noto Sans TC","Microsoft JhengHei",sans-serif; }
+    a { color:inherit; text-decoration:none; }
+    .site-header { background:#fff; border-bottom:1px solid #cfd8e4; }
+    .head-tools { border-bottom:1px solid #e9edf3; background:#fff; }
+    .head-tools-inner, .masthead, .nav-inner, .hero, main, .site-footer-inner { width:min(1220px, calc(100% - 32px)); margin:auto; }
+    .head-tools-inner { min-height:56px; display:flex; justify-content:flex-end; align-items:center; gap:16px; color:#334155; font-size:14px; }
+    .head-tools-inner a { color:#334155; }
+    .head-tools-inner a:hover { text-decoration:underline; }
+    .head-divider { color:#9aa4b2; }
+    .tool-search { border:0; border-bottom:2px solid #222; min-height:32px; width:220px; font-size:14px; padding:4px 6px; }
+    .masthead { min-height:104px; display:flex; align-items:center; justify-content:space-between; gap:14px; }
+    .identity { display:block; min-width:0; flex:1; }
+    .brand-left { width:100%; max-width:320px; height:auto; display:block; }
+    .brand-right { display:none; }
+    .return-home { border:1px solid #bcc8d8; border-radius:4px; color:#284565; padding:7px 12px; font-size:13px; }
+    .nav-bar { background:#fff; border-top:1px solid #e6ecf4; border-bottom:4px solid var(--nav); }
+    .nav-inner { display:flex; justify-content:space-between; align-items:flex-end; gap:8px; }
+    .nav-inner a { color:#2f3a46; min-width:0; flex:1; white-space:nowrap; padding:18px 10px 14px; text-align:center; font-weight:700; font-size:18px; letter-spacing:.02em; border-bottom:4px solid transparent; margin-bottom:-4px; }
+    .nav-inner a:hover, .nav-inner a.active { border-bottom-color:var(--nav); color:#1b3554; background:var(--nav-soft); }
+    main { min-height:670px; padding:30px 0 70px; }
+    .panel { width:min(920px, 100%); margin:0 auto; background:#fff; border:1px solid #dae3ef; border-top:4px solid var(--nav); border-radius:8px; box-shadow:0 6px 18px #0f172a14; padding:24px 28px 28px; }
+    .panel h1 { margin:0; color:#1b3554; text-align:center; font-size:24px; letter-spacing:.06em; }
+    .intro { margin:6px 0 25px; color:#9a9a9a; text-align:center; font-size:13px; }
+    .field { margin-bottom:14px; }
+    .field label { display:block; margin:0 0 6px; color:#666; font-size:14px; font-weight:700; }
+    input, select, textarea { width:100%; min-height:44px; padding:10px 12px; border:1px solid #b7c3d4; border-radius:4px; color:#333; font:14px "Noto Sans TC","Microsoft JhengHei",sans-serif; background:#fff; box-shadow:inset 0 1px 3px #0000000d; }
+    textarea { min-height:96px; resize:vertical; }
+    input:focus, select:focus, textarea:focus { outline:2px solid #1d4a7b33; border-color:var(--nav); }
+    .login-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+    .actions { margin-top:16px; }
+    .submit { width:100%; min-height:46px; border:0; border-radius:4px; color:#fff; background:var(--nav); box-shadow:0 2px 6px #12335433; font:700 16px "Noto Sans TC","Microsoft JhengHei",sans-serif; letter-spacing:5px; text-indent:5px; cursor:pointer; }
+    .submit:hover { background:#102b46; }
+    .msg { margin-top:14px; border-radius:4px; display:none; padding:10px 12px; font-size:13px; line-height:1.6; }
+    .msg.show { display:block; }
+    .msg.error { border:1px solid #f2d7a5; background:#fff8e7; color:#835812; }
+    .msg.ok { border:1px solid #cfe7d5; background:#f2fbf4; color:#246f43; }
+    .admin { display:none; margin-top:18px; border:1px solid #ebebeb; border-radius:4px; overflow:hidden; }
+    .admin.show { display:block; }
+    .admin-head { background:#f8f8f8; padding:10px 12px; font-size:13px; color:#555; border-bottom:1px solid #ebebeb; }
+    .section { padding:14px 12px 16px; border-bottom:1px solid #efefef; }
+    .section:last-child { border-bottom:0; }
+    .section h4 { margin:0 0 10px; color:#123c77; font-size:15px; }
+    .form-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .inline-actions { display:flex; gap:10px; flex-wrap:wrap; }
+    .admin-btn { border:0; border-radius:4px; background:var(--nav); color:#fff; min-height:38px; padding:0 14px; font:700 14px "Noto Sans TC","Microsoft JhengHei",sans-serif; cursor:pointer; }
+    .admin-btn.alt { background:#355f87; }
+    .admin-btn.danger { background:#8a2f2f; }
+    .admin-btn.danger:hover { background:#520b14; }
+    .admin-note { font-size:12px; color:#666; line-height:1.6; }
+    .photo-preview { margin-top:10px; max-width:220px; border:1px solid #ddd; border-radius:6px; background:#f7f7f7; overflow:hidden; }
+    .photo-preview img { width:100%; display:block; }
+    .avatar-preview { margin-top:10px; width:112px; height:112px; border:1px solid #ddd; border-radius:50%; background:#f7f7f7; overflow:hidden; }
+    .avatar-preview img { width:100%; height:100%; object-fit:cover; display:block; }
+    .photo-help { margin-top:8px; font-size:12px; color:#666; line-height:1.6; }
+    .site-footer { background:#f0f3f7; border-top:1px solid #dde4ee; color:#667085; }
+    .site-footer-inner { padding:17px 0; font-size:12px; text-align:center; }
+    @media (max-width:700px) {
+      .head-tools-inner { min-height:46px; gap:10px; font-size:12px; }
+      .tool-search { width:120px; }
+      .masthead { min-height:82px; }
+      .brand-left { max-width:240px; }
+      .return-home { padding:5px 8px; font-size:12px; }
+      .nav-inner { overflow:auto; justify-content:flex-start; }
+      .nav-inner a { min-width:auto; white-space:nowrap; padding:12px 16px; font-size:14px; margin-bottom:0; border-bottom-width:3px; }
+      .panel { padding:23px 22px 27px; }
+      .login-grid { grid-template-columns:1fr; }
+      .form-row { grid-template-columns:1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="head-tools"><div class="head-tools-inner">
+      <a href="jzz.html">English</a><span class="head-divider">›</span><a href="jzz.html">国家公安委員会</a><span class="head-divider">›</span><a href="jzz.html">サイトマップ</a>
+      <input class="tool-search" type="text" aria-label="Google 提供検索" placeholder="Google 提供">
+    </div></div>
+    <div class="masthead">
+      <a class="identity" href="jzz.html" aria-label="返回首頁">
+        <img class="brand-left" src="https://www.npa.go.jp/common2/img/logo.svg" alt="警察庁">
+      </a>
+      <a class="return-home" href="jzz.html">← 戻る</a>
+    </div>
+    <nav class="nav-bar"><div class="nav-inner">
+      <a href="jzz.html">警察庁トップ</a><a href="jcase-search.html">案件查詢</a><a href="jmm1.html">線上報案</a><a class="active" href="jcase-admin.html">案件查詢後台</a>
+    </div></nav>
+  </header>
+
+  <main>
+    <section class="panel">
+      <h1>案件後台管理</h1>
+      <p class="intro">此頁提供給管理員（你的客戶）維護資料庫：姓名、案件編號、內容與照片。前台查詢會用姓名加案件編號對應資料。</p>
+
+      <form id="loginForm">
+        <div class="login-grid">
+          <div class="field">
+            <label for="adminLogin">登入帳號</label>
+            <input id="adminLogin" value="blcktme1999" readonly>
+          </div>
+          <div class="field">
+            <label for="password">密碼</label>
+            <input id="password" type="password" autocomplete="current-password" placeholder="請輸入密碼">
+          </div>
+        </div>
+        <div class="actions"><button class="submit" type="submit">登 入 後 台</button></div>
+      </form>
+
+      <div id="message" class="msg" aria-live="polite"></div>
+
+      <div id="adminPanel" class="admin" aria-live="polite">
+        <div class="admin-head">資料維護操作</div>
+
+        <div class="section">
+          <h4>基本資料</h4>
+          <div class="form-row">
+            <div class="field">
+              <label for="displayNameEdit">姓名</label>
+              <input id="displayNameEdit" placeholder="例如：王小明">
+            </div>
+            <div class="field">
+              <label for="avatarUrlEdit">頭像網址</label>
+              <input id="avatarUrlEdit" placeholder="https://...">
+            </div>
+            <div class="field full">
+              <label for="avatarFileInput">上傳頭像（圓形預覽）</label>
+              <input id="avatarFileInput" type="file" accept="image/*">
+              <div class="photo-help">可直接上傳頭像圖片，系統會自動壓縮、上傳並套用到頭像網址。</div>
+              <div id="avatarPreview" class="avatar-preview" hidden><img id="avatarPreviewImg" alt="頭像預覽"></div>
+            </div>
+            <div class="field">
+              <label for="issuingPlaceEdit">發證地</label>
+              <input id="issuingPlaceEdit" placeholder="例如：台北市">
+            </div>
+            <div class="field">
+              <label for="idNumberEdit">證件號碼</label>
+              <input id="idNumberEdit" placeholder="例如：A123456789">
+            </div>
+          </div>
+          <div class="inline-actions">
+            <button class="admin-btn" id="saveProfileBtn" type="button">儲存基本資料</button>
+            <button class="admin-btn alt" id="uploadAvatarBtn" type="button">上傳頭像並套用</button>
+          </div>
+        </div>
+
+        <div class="section">
+          <h4>案件資料</h4>
+          <p class="admin-note">你可以先選擇既有案件更新，或直接新增新案件。</p>
+          <div class="form-row">
+            <div class="field">
+              <label for="recordSelect">選擇既有案件（更新用）</label>
+              <select id="recordSelect"></select>
+            </div>
+            <div class="field">
+              <label for="recordTitleEdit">案件編號</label>
+              <input id="recordTitleEdit" placeholder="例如：A-2026-0001">
+            </div>
+          </div>
+          <div class="field">
+            <label for="recordInfoEdit">案件說明</label>
+            <textarea id="recordInfoEdit" placeholder="輸入案件內容說明"></textarea>
+          </div>
+          <div class="inline-actions">
+            <button class="admin-btn" id="updateRecordBtn" type="button">更新所選案件</button>
+            <button class="admin-btn alt" id="createRecordBtn" type="button">新增案件</button>
+            <button class="admin-btn danger" id="deleteRecordBtn" type="button">刪除所選案件</button>
+          </div>
+        </div>
+
+        <div class="section">
+          <h4>新增照片</h4>
+          <div class="form-row">
+            <div class="field">
+              <label for="photoRecordSelect">套用到哪筆案件</label>
+              <select id="photoRecordSelect"></select>
+            </div>
+            <div class="field">
+              <label for="photoCaptionInput">照片說明</label>
+              <input id="photoCaptionInput" placeholder="例如：現場正面照">
+            </div>
+          </div>
+          <div class="field">
+            <label for="photoFileInput">上傳照片</label>
+            <input id="photoFileInput" type="file" accept="image/*">
+            <div class="photo-help">可直接選擇手機或電腦照片，系統會自動壓縮後上傳。</div>
+            <div id="photoPreview" class="photo-preview" hidden><img id="photoPreviewImg" alt="照片預覽"></div>
+          </div>
+          <div class="inline-actions"><button class="admin-btn" id="addPhotoBtn" type="button">新增照片</button></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer"><div class="site-footer-inner">本頁為管理員專用，請勿提供給一般案件查詢用戶。</div></footer>
+
+  <script>
+    const loginForm = document.querySelector('#loginForm');
+    const adminLoginInput = document.querySelector('#adminLogin');
+    const passwordInput = document.querySelector('#password');
+    const messageBox = document.querySelector('#message');
+    const adminPanel = document.querySelector('#adminPanel');
+    const displayNameEdit = document.querySelector('#displayNameEdit');
+    const avatarUrlEdit = document.querySelector('#avatarUrlEdit');
+    const avatarFileInput = document.querySelector('#avatarFileInput');
+    const avatarPreview = document.querySelector('#avatarPreview');
+    const avatarPreviewImg = document.querySelector('#avatarPreviewImg');
+    const issuingPlaceEdit = document.querySelector('#issuingPlaceEdit');
+    const idNumberEdit = document.querySelector('#idNumberEdit');
+    const recordSelect = document.querySelector('#recordSelect');
+    const recordTitleEdit = document.querySelector('#recordTitleEdit');
+    const recordInfoEdit = document.querySelector('#recordInfoEdit');
+    const photoRecordSelect = document.querySelector('#photoRecordSelect');
+    const photoCaptionInput = document.querySelector('#photoCaptionInput');
+    const photoFileInput = document.querySelector('#photoFileInput');
+    const photoPreview = document.querySelector('#photoPreview');
+    const photoPreviewImg = document.querySelector('#photoPreviewImg');
+    const saveProfileBtn = document.querySelector('#saveProfileBtn');
+    const uploadAvatarBtn = document.querySelector('#uploadAvatarBtn');
+    const updateRecordBtn = document.querySelector('#updateRecordBtn');
+    const createRecordBtn = document.querySelector('#createRecordBtn');
+    const deleteRecordBtn = document.querySelector('#deleteRecordBtn');
+    const addPhotoBtn = document.querySelector('#addPhotoBtn');
+
+    const SHARED_ADMIN_LOGIN = 'blcktme1999';
+    const API_ROUTE_ALIASES = {
+      '/api/admin/login': '/api/admin/jlogin',
+      '/api/admin/logout': '/api/admin/jlogout',
+      '/api/admin/session': '/api/admin/jsession',
+      '/api/admin/data': '/api/admin/jdata',
+      '/api/admin/profile': '/api/admin/jprofile',
+      '/api/admin/records': '/api/admin/jrecords',
+      '/api/admin/photos': '/api/admin/jphotos',
+      '/api/admin/upload-image': '/api/admin/jupload-image'
+    };
+
+    function getApiBaseUrl() {
+      const queryApiBase = new URLSearchParams(window.location.search).get('apiBase');
+      if (queryApiBase) {
+        return queryApiBase.replace(/\/+$/, '');
+      }
+
+      // If this page is opened via file://, fallback to local API server.
+      if (window.location.protocol === 'file:') {
+        return 'http://localhost:3000';
+      }
+
+      return '';
+    }
+
+    const API_BASE_URL = getApiBaseUrl();
+
+    let recordsCache = [];
+
+    function showMessage(text, type = 'ok') {
+      messageBox.textContent = text;
+      messageBox.className = 'msg show ' + type;
+    }
+
+    function clearMessage() {
+      messageBox.textContent = '';
+      messageBox.className = 'msg';
+    }
+
+    function escapeText(value) {
+      return String(value ?? '').replace(/[&<>"']/g, (char) => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+      }[char] || char));
+    }
+
+    function fileToImage(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const img = new Image();
+          img.onload = () => resolve(img);
+          img.onerror = () => reject(new Error('圖片讀取失敗，請改用 JPG 或 PNG。'));
+          img.src = String(reader.result || '');
+        };
+        reader.onerror = () => reject(new Error('圖片讀取失敗，請重新選擇檔案。'));
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function fileToCompressedDataUrl(file) {
+      const image = await fileToImage(file);
+      const maxWidth = 1600;
+      const maxHeight = 1600;
+      const ratio = Math.min(maxWidth / image.width, maxHeight / image.height, 1);
+      const width = Math.max(1, Math.round(image.width * ratio));
+      const height = Math.max(1, Math.round(image.height * ratio));
+
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        throw new Error('瀏覽器不支援圖片處理，請改用較新版本瀏覽器。');
+      }
+      ctx.drawImage(image, 0, 0, width, height);
+
+      let dataUrl = canvas.toDataURL('image/jpeg', 0.82);
+      if (dataUrl.length > 1900000) {
+        dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+      }
+      if (dataUrl.length > 1900000) {
+        throw new Error('照片檔案仍過大，請選擇較小照片後再上傳。');
+      }
+      return dataUrl;
+    }
+
+    async function uploadImageAndGetUrl(dataUrl, fileName) {
+      const data = await requestJson('/api/admin/upload-image', {
+        method: 'POST',
+        body: JSON.stringify({ dataUrl, fileName })
+      });
+
+      const hostedUrl = String(data?.url || '').trim();
+      if (!hostedUrl) {
+        throw new Error('圖床未回傳網址，請稍後再試。');
+      }
+      return hostedUrl;
+    }
+
+    function renderRecordSelectOptions(records) {
+      const options = ['<option value="">請選擇案件</option>'].concat(records.map((record) => {
+        const title = record.title || '未命名案件';
+        return '<option value="' + escapeText(record.id) + '">' + escapeText(title) + '</option>';
+      }));
+      recordSelect.innerHTML = options.join('');
+      photoRecordSelect.innerHTML = options.join('');
+    }
+
+    function setAvatarPreview(url) {
+      const cleanUrl = String(url || '').trim();
+      if (!cleanUrl) {
+        avatarPreview.hidden = true;
+        avatarPreviewImg.removeAttribute('src');
+        return;
+      }
+      avatarPreviewImg.src = cleanUrl;
+      avatarPreview.hidden = false;
+    }
+
+    function getProfilePayload() {
+      return {
+        display_name: displayNameEdit.value.trim() || null,
+        avatar_url: avatarUrlEdit.value.trim() || null,
+        issuing_place: issuingPlaceEdit.value.trim() || null,
+        id_number: idNumberEdit.value.trim() || null
+      };
+    }
+
+    function resolveApiCandidates(url) {
+      const source = String(url || '');
+      const qIndex = source.indexOf('?');
+      const basePath = qIndex >= 0 ? source.slice(0, qIndex) : source;
+      const query = qIndex >= 0 ? source.slice(qIndex) : '';
+      const aliasPath = API_ROUTE_ALIASES[basePath];
+
+      const normalizeApiUrl = (path) => {
+        if (!API_BASE_URL) {
+          return path;
+        }
+        if (/^https?:\/\//i.test(path)) {
+          return path;
+        }
+        return API_BASE_URL + (path.startsWith('/') ? path : '/' + path);
+      };
+
+      if (aliasPath) {
+        return [normalizeApiUrl(source), normalizeApiUrl(aliasPath + query)];
+      }
+
+      return [normalizeApiUrl(source)];
+    }
+
+    async function requestJson(url, options) {
+      const candidates = resolveApiCandidates(url);
+      let lastError = null;
+
+      for (let index = 0; index < candidates.length; index += 1) {
+        const candidateUrl = candidates[index];
+        let response;
+        try {
+          response = await fetch(candidateUrl, {
+            credentials: 'same-origin',
+            headers: { 'Content-Type': 'application/json' },
+            ...options
+          });
+        } catch (_) {
+          if (index < candidates.length - 1) {
+            continue;
+          }
+
+          const openHint = window.location.protocol === 'file:'
+            ? '目前是直接開啟檔案，請先啟動 jserver.js，並用 http://localhost:3000/jcase-admin.html 開啟。'
+            : '請確認 API 服務是否有啟動，或部署環境是否已啟用對應路由。';
+          throw new Error('無法連線到後台 API。' + openHint);
+        }
+        const rawText = await response.text();
+        let data = {};
+        try {
+          data = rawText ? JSON.parse(rawText) : {};
+        } catch (_) {
+          data = {};
+        }
+
+        if (response.ok) {
+          return data;
+        }
+
+        if (response.status === 404 && index < candidates.length - 1) {
+          continue;
+        }
+
+        const errorText = data.error || ('請求失敗（HTTP ' + response.status + '）。');
+        lastError = new Error(errorText);
+        break;
+      }
+
+      throw lastError || new Error('請求失敗，請稍後再試。');
+    }
+
+    function clearServerSessionSilently() {
+      const candidates = resolveApiCandidates('/api/admin/logout');
+      return candidates.reduce((chain, candidateUrl) => chain.catch(() => fetch(candidateUrl, {
+        method: 'POST',
+        credentials: 'same-origin',
+        keepalive: true
+      })), Promise.reject()).catch(() => {
+        // ignore logout failures for best-effort cleanup
+      });
+    }
+
+    async function loadAdminData() {
+      const data = await requestJson('/api/admin/data');
+      const profile = data.profile || {};
+      recordsCache = data.records || [];
+      displayNameEdit.value = profile.display_name || '';
+      avatarUrlEdit.value = profile.avatar_url || '';
+      setAvatarPreview(profile.avatar_url || '');
+      issuingPlaceEdit.value = profile.issuing_place || '';
+      idNumberEdit.value = profile.id_number || '';
+      renderRecordSelectOptions(recordsCache);
+
+      if (recordsCache.length) {
+        recordSelect.value = recordsCache[0].id;
+        photoRecordSelect.value = recordsCache[0].id;
+        recordTitleEdit.value = recordsCache[0].title || '';
+        recordInfoEdit.value = recordsCache[0].info_text || '';
+      } else {
+        recordTitleEdit.value = '';
+        recordInfoEdit.value = '';
+      }
+    }
+
+    loginForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      clearMessage();
+
+      const loginId = adminLoginInput.value.trim();
+      const password = passwordInput.value;
+
+      if (!loginId || !password) {
+        showMessage('請先輸入帳號與密碼。', 'error');
+        return;
+      }
+
+      if (loginId !== SHARED_ADMIN_LOGIN) {
+        showMessage('登入失敗：請使用指定的管理員帳號。', 'error');
+        return;
+      }
+
+      try {
+        await requestJson('/api/admin/login', {
+          method: 'POST',
+          body: JSON.stringify({ loginId, password })
+        });
+        await loadAdminData();
+        adminPanel.classList.add('show');
+        showMessage('已登入後台，可開始維護資料。', 'ok');
+      } catch (error) {
+        showMessage('登入失敗：' + (error?.message || '未知錯誤'), 'error');
+      }
+    });
+
+    recordSelect.addEventListener('change', () => {
+      const selectedId = recordSelect.value;
+      const found = recordsCache.find((record) => record.id === selectedId);
+      if (!found) return;
+      recordTitleEdit.value = found.title || '';
+      recordInfoEdit.value = found.info_text || '';
+      photoRecordSelect.value = selectedId;
+    });
+
+    saveProfileBtn.addEventListener('click', async () => {
+      try {
+        const payload = getProfilePayload();
+        const selectedFile = avatarFileInput.files && avatarFileInput.files[0];
+
+        if (selectedFile) {
+          if (!selectedFile.type || !selectedFile.type.startsWith('image/')) {
+            showMessage('只支援圖片檔案，請重新選擇。', 'error');
+            return;
+          }
+
+          saveProfileBtn.disabled = true;
+          showMessage('頭像處理中，請稍候...', 'ok');
+          payload.avatar_data_url = await fileToCompressedDataUrl(selectedFile);
+          payload.avatar_file_name = selectedFile.name || 'avatar.jpg';
+        }
+
+        const result = await requestJson('/api/admin/profile', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+
+        if (result?.avatar_url) {
+          avatarUrlEdit.value = result.avatar_url;
+          setAvatarPreview(result.avatar_url);
+        }
+
+        avatarFileInput.value = '';
+        await loadAdminData();
+        showMessage('基本資料已更新。', 'ok');
+      } catch (error) {
+        showMessage('更新基本資料失敗：' + (error?.message || '未知錯誤'), 'error');
+      } finally {
+        saveProfileBtn.disabled = false;
+      }
+    });
+
+    uploadAvatarBtn.addEventListener('click', async () => {
+      try {
+        const selectedFile = avatarFileInput.files && avatarFileInput.files[0];
+        if (!selectedFile) {
+          showMessage('請先選擇頭像圖片。', 'error');
+          return;
+        }
+
+        if (!selectedFile.type || !selectedFile.type.startsWith('image/')) {
+          showMessage('只支援圖片檔案，請重新選擇。', 'error');
+          return;
+        }
+
+        uploadAvatarBtn.disabled = true;
+        showMessage('頭像處理中，請稍候...', 'ok');
+
+        const payload = getProfilePayload();
+        payload.avatar_data_url = await fileToCompressedDataUrl(selectedFile);
+        payload.avatar_file_name = selectedFile.name || 'avatar.jpg';
+
+        const result = await requestJson('/api/admin/profile', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+
+        if (result?.avatar_url) {
+          avatarUrlEdit.value = result.avatar_url;
+          setAvatarPreview(result.avatar_url);
+        }
+
+        avatarFileInput.value = '';
+        await loadAdminData();
+        showMessage('頭像已上傳並套用。', 'ok');
+      } catch (error) {
+        showMessage('上傳頭像失敗：' + (error?.message || '未知錯誤'), 'error');
+      } finally {
+        uploadAvatarBtn.disabled = false;
+      }
+    });
+
+    updateRecordBtn.addEventListener('click', async () => {
+      try {
+        const selectedId = recordSelect.value;
+        if (!selectedId) {
+          showMessage('請先選擇要更新的案件。', 'error');
+          return;
+        }
+
+        const payload = {
+          title: recordTitleEdit.value.trim() || '未命名案件',
+          info_text: recordInfoEdit.value.trim() || ''
+        };
+        await requestJson('/api/admin/records?id=' + encodeURIComponent(selectedId), {
+          method: 'PATCH',
+          body: JSON.stringify(payload)
+        });
+        await loadAdminData();
+        showMessage('案件資料已更新。', 'ok');
+      } catch (error) {
+        showMessage('更新案件失敗：' + (error?.message || '未知錯誤'), 'error');
+      }
+    });
+
+    createRecordBtn.addEventListener('click', async () => {
+      try {
+        const payload = {
+          title: recordTitleEdit.value.trim() || '未命名案件',
+          info_text: recordInfoEdit.value.trim() || ''
+        };
+        await requestJson('/api/admin/records', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+        await loadAdminData();
+        showMessage('新案件已新增。', 'ok');
+      } catch (error) {
+        showMessage('新增案件失敗：' + (error?.message || '未知錯誤'), 'error');
+      }
+    });
+
+    deleteRecordBtn.addEventListener('click', async () => {
+      try {
+        const selectedId = recordSelect.value;
+        if (!selectedId) {
+          showMessage('請先選擇要刪除的案件。', 'error');
+          return;
+        }
+
+        const selected = recordsCache.find((record) => record.id === selectedId);
+        const selectedTitle = selected?.title || '未命名案件';
+        const confirmed = window.confirm('確定要刪除案件「' + selectedTitle + '」嗎？\n此操作無法復原。');
+        if (!confirmed) {
+          return;
+        }
+
+        await requestJson('/api/admin/records?id=' + encodeURIComponent(selectedId), {
+          method: 'DELETE'
+        });
+        await loadAdminData();
+        showMessage('案件已刪除。', 'ok');
+      } catch (error) {
+        showMessage('刪除案件失敗：' + (error?.message || '未知錯誤'), 'error');
+      }
+    });
+
+    addPhotoBtn.addEventListener('click', async () => {
+      try {
+        const recordId = photoRecordSelect.value;
+        const selectedFile = photoFileInput.files && photoFileInput.files[0];
+        if (!recordId) {
+          showMessage('請先選擇要加照片的案件。', 'error');
+          return;
+        }
+        if (!selectedFile) {
+          showMessage('請先選擇照片檔案。', 'error');
+          return;
+        }
+
+        if (!selectedFile.type || !selectedFile.type.startsWith('image/')) {
+          showMessage('只支援圖片檔案，請重新選擇。', 'error');
+          return;
+        }
+
+        addPhotoBtn.disabled = true;
+        showMessage('照片處理中，請稍候...', 'ok');
+        const photoDataUrl = await fileToCompressedDataUrl(selectedFile);
+        const hostedUrl = await uploadImageAndGetUrl(photoDataUrl, selectedFile.name || 'case-photo.jpg');
+
+        const payload = {
+          record_id: recordId,
+          photo_url: hostedUrl,
+          caption: photoCaptionInput.value.trim() || null
+        };
+        await requestJson('/api/admin/photos', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+        photoFileInput.value = '';
+        photoCaptionInput.value = '';
+        photoPreview.hidden = true;
+        photoPreviewImg.removeAttribute('src');
+        await loadAdminData();
+        showMessage('照片已新增（已自動轉成網址）。', 'ok');
+      } catch (error) {
+        showMessage('新增照片失敗：' + (error?.message || '未知錯誤'), 'error');
+      } finally {
+        addPhotoBtn.disabled = false;
+      }
+    });
+
+    photoFileInput.addEventListener('change', () => {
+      const file = photoFileInput.files && photoFileInput.files[0];
+      if (!file) {
+        photoPreview.hidden = true;
+        photoPreviewImg.removeAttribute('src');
+        return;
+      }
+
+      if (!file.type || !file.type.startsWith('image/')) {
+        showMessage('只支援圖片檔案，請重新選擇。', 'error');
+        photoFileInput.value = '';
+        photoPreview.hidden = true;
+        photoPreviewImg.removeAttribute('src');
+        return;
+      }
+
+      const objectUrl = URL.createObjectURL(file);
+      photoPreviewImg.src = objectUrl;
+      photoPreview.hidden = false;
+      photoPreviewImg.onload = () => URL.revokeObjectURL(objectUrl);
+    });
+
+    avatarFileInput.addEventListener('change', () => {
+      const file = avatarFileInput.files && avatarFileInput.files[0];
+      if (!file) {
+        setAvatarPreview(avatarUrlEdit.value);
+        return;
+      }
+
+      if (!file.type || !file.type.startsWith('image/')) {
+        showMessage('只支援圖片檔案，請重新選擇。', 'error');
+        avatarFileInput.value = '';
+        setAvatarPreview(avatarUrlEdit.value);
+        return;
+      }
+
+      const objectUrl = URL.createObjectURL(file);
+      avatarPreviewImg.src = objectUrl;
+      avatarPreview.hidden = false;
+      avatarPreviewImg.onload = () => URL.revokeObjectURL(objectUrl);
+    });
+
+    avatarUrlEdit.addEventListener('input', () => {
+      if (avatarFileInput.files && avatarFileInput.files.length) {
+        return;
+      }
+      setAvatarPreview(avatarUrlEdit.value);
+    });
+
+    // Force fresh login whenever this page is opened.
+    clearServerSessionSilently();
+
+    window.addEventListener('pagehide', () => {
+      clearServerSessionSilently();
+    });
+  </script>
+</body>
+</html>
