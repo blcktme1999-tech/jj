@@ -5,6 +5,7 @@
     }
   },
   "rewrites": [
+    { "source": "/api/agora-token", "destination": "/api/jagora-token" },
     { "source": "/api/case-search", "destination": "/api/jcase-search" },
     { "source": "/api/admin/login", "destination": "/api/admin/jlogin" },
     { "source": "/api/admin/logout", "destination": "/api/admin/jlogout" },
