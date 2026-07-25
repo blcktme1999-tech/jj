@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>案件查詢 - 警察庁</title>
+  <style>
+    :root { --ink:#2d2d2d; --paper:#f6f7f8; --muted:#667085; --line:#d8dee8; --nav:#183a5d; --nav-soft:#e7edf5; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; color:var(--ink); background:var(--paper); font-family:"Noto Sans TC","Microsoft JhengHei",sans-serif; }
+    a { color:inherit; text-decoration:none; }
+    .site-header { background:#fff; border-bottom:1px solid #cfd8e4; }
+    .head-tools { border-bottom:1px solid #e9edf3; background:#fff; }
+    .head-tools-inner, .masthead, .nav-inner, .hero, main, .site-footer-inner { width:min(1220px, calc(100% - 32px)); margin:auto; }
+    .head-tools-inner { min-height:56px; display:flex; justify-content:flex-end; align-items:center; gap:16px; color:#334155; font-size:14px; }
+    .head-tools-inner a { color:#334155; }
+    .head-tools-inner a:hover { text-decoration:underline; }
+    .head-divider { color:#9aa4b2; }
+    .tool-search { border:0; border-bottom:2px solid #222; min-height:32px; width:220px; font-size:14px; padding:4px 6px; }
+    .masthead { min-height:104px; display:flex; align-items:center; justify-content:space-between; gap:14px; }
+    .identity { display:block; min-width:0; flex:1; }
+    .brand-left { width:100%; max-width:320px; height:auto; display:block; }
+    .return-home { border:1px solid #bcc8d8; border-radius:4px; color:#284565; padding:7px 12px; font-size:13px; }
+    .nav-bar { background:#fff; border-top:1px solid #e6ecf4; border-bottom:4px solid var(--nav); }
+    .nav-inner { display:flex; justify-content:space-between; align-items:flex-end; gap:8px; }
+    .nav-inner a { color:#2f3a46; min-width:0; flex:1; white-space:nowrap; padding:18px 10px 14px; text-align:center; font-weight:700; font-size:18px; letter-spacing:.02em; border-bottom:4px solid transparent; margin-bottom:-4px; }
+    .nav-inner a:hover, .nav-inner a.active { border-bottom-color:var(--nav); color:#1b3554; background:var(--nav-soft); }
+    main { min-height:670px; padding:30px 0 70px; }
+    .query-panel { width:min(820px, 100%); margin:0 auto; background:#fff; border:1px solid #dae3ef; border-top:4px solid var(--nav); border-radius:8px; box-shadow:0 6px 18px #0f172a14; padding:24px 28px 28px; }
+    .query-panel h1 { margin:0; color:#1b3554; text-align:center; font-size:24px; letter-spacing:.06em; }
+    .intro { margin:8px 0 24px; color:#7b8798; text-align:center; font-size:13px; }
+    .field { margin-bottom:14px; }
+    .field label { display:block; margin:0 0 6px; color:#4b5563; font-size:14px; font-weight:700; }
+    input { width:100%; min-height:44px; padding:10px 12px; border:1px solid #b7c3d4; border-radius:4px; color:#333; font:14px "Noto Sans TC","Microsoft JhengHei",sans-serif; background:#fff; box-shadow:inset 0 1px 3px #0000000d; }
+    input:focus { outline:2px solid #1d4a7b33; border-color:var(--nav); }
+    .login-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+    .actions { margin-top:16px; }
+    .submit { width:100%; min-height:46px; border:0; border-radius:4px; color:#fff; background:var(--nav); box-shadow:0 2px 6px #12335433; font:700 16px "Noto Sans TC","Microsoft JhengHei",sans-serif; letter-spacing:5px; text-indent:5px; cursor:pointer; }
+    .submit:hover { background:#102b46; }
+    .hint { margin:14px 0 0; color:var(--muted); font-size:12px; line-height:1.6; }
+    .msg { margin-top:14px; border-radius:4px; display:none; padding:10px 12px; font-size:13px; line-height:1.6; }
+    .msg.show { display:block; }
+    .msg.error { display:block; border:1px solid #f2d7a5; background:#fff8e7; color:#835812; }
+    .msg.ok { display:block; border:1px solid #cfe7d5; background:#f2fbf4; color:#246f43; }
+    .result { display:none; margin-top:18px; border:1px solid #ebebeb; border-radius:4px; overflow:hidden; }
+    .result.show { display:block; }
+    .result-head { background:#f8fbff; padding:10px 12px; font-size:13px; color:#555; border-bottom:1px solid #e6edf5; }
+    .profile { display:flex; gap:16px; align-items:flex-start; padding:16px 12px; border-bottom:1px solid #efefef; }
+    .avatar { width:64px; height:64px; border-radius:50%; display:grid; place-items:center; background:#f0f4f8; color:#789; font-size:24px; overflow:hidden; flex:0 0 auto; }
+    .avatar img { width:100%; height:100%; object-fit:cover; display:block; }
+    .profile-main { flex:1; }
+    .profile-main h3 { margin:0; color:#123c77; font-size:20px; }
+    .profile-main p { margin:6px 0 0; color:#666; font-size:13px; line-height:1.6; }
+    .tags { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+    .tag { display:inline-block; padding:5px 9px; border:1px solid #e5e5e5; border-radius:999px; background:#fafafa; color:#555; font-size:12px; }
+    .section { padding:14px 12px 16px; border-bottom:1px solid #efefef; }
+    .section:last-child { border-bottom:0; }
+    .section h4 { margin:0 0 10px; color:#123c77; font-size:15px; }
+    .list { display:grid; gap:10px; }
+    .item { padding:10px 12px; border:1px solid #ececec; border-radius:4px; background:#fff; }
+    .item .top { display:flex; justify-content:space-between; gap:12px; align-items:flex-start; }
+    .item .title { font-weight:700; font-size:14px; }
+    .item .detail { margin-top:6px; color:#555; font-size:13px; line-height:1.55; white-space:pre-wrap; }
+    .item .time { color:#999; font-size:12px; white-space:nowrap; }
+    .thumbs { display:grid; grid-template-columns:repeat(auto-fill, minmax(128px, 1fr)); gap:10px; }
+    .thumb { border:1px solid #ececec; border-radius:4px; overflow:hidden; background:#fafafa; }
+    .thumb img { width:100%; aspect-ratio:1/1; object-fit:cover; display:block; }
+    .thumb .cap { padding:8px 9px; font-size:12px; color:#555; line-height:1.45; }
+    .empty { color:#777; font-size:13px; line-height:1.6; }
+    .site-footer { background:#f0f3f7; border-top:1px solid #dde4ee; color:#667085; }
+    .site-footer-inner { padding:17px 0; font-size:12px; text-align:center; }
+    @media (max-width:900px) {
+      .head-tools-inner { min-height:46px; gap:10px; font-size:12px; }
+      .tool-search { width:120px; }
+      .masthead { min-height:82px; }
+      .brand-left { max-width:240px; }
+      .return-home { padding:5px 8px; font-size:12px; }
+      .nav-inner { overflow:auto; justify-content:flex-start; }
+      .nav-inner a { min-width:auto; white-space:nowrap; padding:12px 16px; font-size:14px; margin-bottom:0; border-bottom-width:3px; }
+      main { padding-top:24px; }
+      .query-panel { padding:22px 20px 24px; }
+      .login-grid { grid-template-columns:1fr; }
+      .profile { flex-direction:column; }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="head-tools"><div class="head-tools-inner">
+      <a href="jzz.html">English</a><span class="head-divider">›</span><a href="jzz.html">国家公安委員会</a><span class="head-divider">›</span><a href="jzz.html">サイトマップ</a>
+      <input class="tool-search" type="text" aria-label="Google 提供検索" placeholder="Google 提供">
+    </div></div>
+    <div class="masthead">
+      <a class="identity" href="jzz.html" aria-label="返回首頁">
+        <img class="brand-left" src="https://www.npa.go.jp/common2/img/logo.svg" alt="警察庁">
+      </a>
+      <a class="return-home" href="jzz.html">← 戻る</a>
+    </div>
+    <nav class="nav-bar"><div class="nav-inner">
+      <a href="jzz.html">警察庁トップ</a><a class="active" href="jcase-search.html">案件查詢</a><a href="jmm1.html">線上報案</a>
+    </div></nav>
+  </header>
+
+  <main>
+    <section class="query-panel">
+      <h1>案件查詢</h1>
+      <p class="intro">輸入姓名與案件編號後，系統會自動顯示對應案件資料，無需登入。</p>
+
+      <form id="loginForm">
+        <div class="login-grid">
+          <div class="field">
+            <label for="loginId">姓名</label>
+            <input id="loginId" autocomplete="name" placeholder="例如：明子">
+          </div>
+          <div class="field">
+            <label for="password">案件編號</label>
+            <input id="password" autocomplete="off" placeholder="例如：A-2026-0001">
+          </div>
+        </div>
+        <div class="actions">
+          <button class="submit" type="submit">查 詢</button>
+        </div>
+        <p class="hint">一般用戶只需填寫姓名與案件編號即可查詢，不需要建立帳號或登入。</p>
+      </form>
+
+      <div id="message" class="msg" aria-live="polite"></div>
+
+      <div id="resultPanel" class="result" aria-live="polite">
+        <div class="result-head">查詢結果</div>
+        <div class="profile">
+          <div class="avatar" id="avatarBox">?</div>
+          <div class="profile-main">
+            <h3 id="displayName">尚未查詢</h3>
+            <p id="profileText">查詢後顯示你的個人資料與案件資訊。</p>
+            <div class="tags" id="profileTags"></div>
+          </div>
+        </div>
+        <div class="section">
+          <h4>案件資訊</h4>
+          <div id="recordsBox" class="list"><div class="empty">尚未載入資料。</div></div>
+        </div>
+        <div class="section">
+          <h4>照片</h4>
+          <div id="photosBox" class="thumbs"></div>
+        </div>
+        <div class="section">
+          <h4>留言</h4>
+          <div id="messagesBox" class="list"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer"><div class="site-footer-inner">案件查詢由後端代為讀取資料，一般用戶無需登入。</div></footer>
+
+  <script>
+    const loginForm = document.querySelector('#loginForm');
+    const loginIdInput = document.querySelector('#loginId');
+    const passwordInput = document.querySelector('#password');
+    const messageBox = document.querySelector('#message');
+    const resultPanel = document.querySelector('#resultPanel');
+    const displayName = document.querySelector('#displayName');
+    const profileText = document.querySelector('#profileText');
+    const profileTags = document.querySelector('#profileTags');
+    const avatarBox = document.querySelector('#avatarBox');
+    const recordsBox = document.querySelector('#recordsBox');
+    const photosBox = document.querySelector('#photosBox');
+    const messagesBox = document.querySelector('#messagesBox');
+
+    function showMessage(text, type = 'ok') {
+      messageBox.textContent = text;
+      messageBox.className = 'msg show ' + type;
+    }
+
+    function clearMessage() {
+      messageBox.textContent = '';
+      messageBox.className = 'msg';
+    }
+
+    function escapeText(value) {
+      return String(value ?? '').replace(/[&<>\"]/g, (char) => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;'
+      }[char] || char));
+    }
+
+    function fmtTime(value) {
+      if (!value) return '-';
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return String(value);
+      return date.toLocaleString('zh-Hant', { hour12: false });
+    }
+
+    function renderProfile(profile) {
+      const name = profile?.display_name || '未命名使用者';
+      const avatarUrl = profile?.avatar_url || '';
+      const issuingPlace = profile?.issuing_place || '-';
+      const idNumber = profile?.id_number || '-';
+
+      displayName.textContent = name;
+      profileText.innerHTML = '發證地：' + escapeText(issuingPlace) + '<br>證件號碼：' + escapeText(idNumber);
+      profileTags.innerHTML = '';
+
+      if (avatarUrl) {
+        avatarBox.innerHTML = '<img alt="avatar" src="' + escapeText(avatarUrl) + '">';
+      } else {
+        avatarBox.textContent = (name || '?').trim().charAt(0) || '?';
+      }
+    }
+
+    function renderRecords(records) {
+      if (!records.length) {
+        recordsBox.innerHTML = '<div class="empty">沒有找到案件資訊。</div>';
+        return;
+      }
+      recordsBox.innerHTML = records.map((record) => {
+        return '<div class="item">' +
+          '<div class="top"><div class="title">' + escapeText(record.title || '未命名案件') + '</div><div class="time">' + fmtTime(record.created_at) + '</div></div>' +
+          '<div class="detail">' + escapeText(record.info_text || '') + '</div>' +
+        '</div>';
+      }).join('');
+    }
+
+    function renderPhotos(photos) {
+      if (!photos.length) {
+        photosBox.innerHTML = '<div class="empty">沒有找到照片。</div>';
+        return;
+      }
+      photosBox.innerHTML = photos.map((photo) => {
+        return '<div class="thumb">' +
+          '<img alt="photo" src="' + escapeText(photo.photo_url) + '">' +
+          '<div class="cap">' + escapeText(photo.caption || '照片') + '</div>' +
+        '</div>';
+      }).join('');
+    }
+
+    function renderMessages(messages) {
+      if (!messages.length) {
+        messagesBox.innerHTML = '<div class="empty">沒有找到留言。</div>';
+        return;
+      }
+      messagesBox.innerHTML = messages.map((message) => {
+        return '<div class="item">' +
+          '<div class="top"><div class="title">' + escapeText(message.sender_role || 'staff') + '</div><div class="time">' + fmtTime(message.created_at) + '</div></div>' +
+          '<div class="detail">' + escapeText(message.message || '') + '</div>' +
+        '</div>';
+      }).join('');
+    }
+
+    async function requestJson(url, options) {
+      const response = await fetch(url, {
+        headers: { 'Content-Type': 'application/json' },
+        ...options
+      });
+      const rawText = await response.text();
+      let data = {};
+      try {
+        data = rawText ? JSON.parse(rawText) : {};
+      } catch (_) {
+        data = {};
+      }
+      if (!response.ok) {
+        throw new Error(data.error || ('請求失敗（HTTP ' + response.status + '）。'));
+      }
+      return data;
+    }
+
+    function renderResult(data) {
+      const profile = data.profile || {};
+      const records = data.records || [];
+
+      renderProfile(profile);
+      renderRecords(records);
+
+      renderPhotos(data.photos || []);
+      renderMessages(data.messages || []);
+
+      resultPanel.classList.add('show');
+      showMessage('已找到對應案件資料。', 'ok');
+    }
+
+    loginForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      clearMessage();
+      resultPanel.classList.remove('show');
+
+      const displayNameValue = loginIdInput.value.trim();
+      const caseNumber = passwordInput.value.trim();
+
+      if (!displayNameValue || !caseNumber) {
+        showMessage('請先輸入姓名與案件編號。', 'error');
+        return;
+      }
+
+      try {
+        const data = await requestJson('/api/case-search', {
+          method: 'POST',
+          body: JSON.stringify({ displayName: displayNameValue, caseNumber })
+        });
+        renderResult(data);
+      } catch (error) {
+        showMessage('查詢失敗：' + (error?.message || '未知錯誤'), 'error');
+      }
+    });
+  </script>
+</body>
+</html>
