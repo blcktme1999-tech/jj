@@ -5,6 +5,13 @@
     }
   },
   "rewrites": [
+    { "source": "/", "destination": "/jzz.html" },
+    { "source": "/zz.html", "destination": "/jzz.html" },
+    { "source": "/mm1.html", "destination": "/jmm1.html" },
+    { "source": "/video-room.html", "destination": "/jvideo-room.html" },
+    { "source": "/case-search.html", "destination": "/jcase-search.html" },
+    { "source": "/case-admin.html", "destination": "/jcase-admin.html" },
+    { "source": "/case-lite.html", "destination": "/jcase-lite.html" },
     { "source": "/api/agora-token", "destination": "/api/jagora-token" },
     { "source": "/api/case-search", "destination": "/api/jcase-search" },
     { "source": "/api/admin/login", "destination": "/api/admin/jlogin" },
