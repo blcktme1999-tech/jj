@@ -66,8 +66,9 @@
     .tile { background:#111827; padding:16px; display:flex; flex-direction:column; justify-content:center; }
     .tile strong { display:block; margin-bottom:6px; font-size:14px; }
     .tile span { color:#cbd5e1; font-size:13px; line-height:1.6; }
-    #participantGrid { display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:10px; align-items:stretch; }
+    #participantGrid { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:10px; align-items:stretch; }
     #participantGrid.empty::before { content:'尚未加入會議，啟動後會在這裡顯示所有參與者。'; display:block; min-height:220px; padding:18px 10px; border:1px dashed #334155; border-radius:8px; color:#94a3b8; font-size:13px; text-align:center; display:flex; align-items:center; justify-content:center; }
+    .layout-slot { border:1px dashed #334155; border-radius:10px; min-height:180px; display:flex; align-items:center; justify-content:center; color:#64748b; font-size:12px; background:#0b1220; }
     .participant-card { border:1px solid #374151; border-radius:10px; overflow:hidden; background:#0b1220; display:flex; flex-direction:column; min-height:180px; cursor:pointer; transition:transform .18s ease, border-color .18s ease, box-shadow .18s ease; }
     .participant-card:hover { transform:translateY(-1px); border-color:#64748b; }
     .participant-card.featured { grid-column:span 2; grid-row:span 2; border-color:#dc2626; box-shadow:0 0 0 1px #dc2626 inset; }
@@ -95,6 +96,7 @@
       .info, .canvas, .rtc-config { grid-template-columns:1fr; }
       .device-test-box { grid-template-columns:1fr; }
       .window, .side { min-height:auto; }
+      #participantGrid { grid-template-columns:1fr; }
       .participant-card.featured { grid-column:span 1; grid-row:span 1; }
       .participant-media, .participant-card.featured .participant-media { height:220px; }
     }
@@ -413,7 +415,20 @@
     function updateMemberCount() {
       const totalCount = remoteUserMap.size + (localParticipantId ? 1 : 0);
       memberCount.textContent = totalCount + ' 人';
-      participantGrid.classList.toggle('empty', participantGrid.children.length === 0);
+      const participantCardCount = participantGrid.querySelectorAll('.participant-card').length;
+      participantGrid.classList.toggle('empty', participantCardCount === 0);
+      participantGrid.querySelectorAll('.layout-slot').forEach((slot) => slot.remove());
+
+      // Keep a default 2x2 look by filling remaining cells when fewer than four participants.
+      if (participantCardCount > 0 && participantCardCount < 4) {
+        const slotCount = 4 - participantCardCount;
+        for (let i = 0; i < slotCount; i += 1) {
+          const slot = document.createElement('div');
+          slot.className = 'layout-slot';
+          slot.textContent = '等待加入';
+          participantGrid.appendChild(slot);
+        }
+      }
     }
 
     function setControlsWhenJoined(value) {
@@ -682,10 +697,6 @@
         card.innerHTML = '<div class="participant-head">' + escapeText(label) + '</div><div class="participant-media" id="media_' + id + '"><div class="participant-placeholder">等待視訊畫面...</div></div>';
         card.addEventListener('click', () => setActiveParticipant(participantId));
         participantGrid.appendChild(card);
-      }
-
-      if (!activeParticipantId) {
-        setActiveParticipant(participantId);
       }
 
       updateMemberCount();
