@@ -1,0 +1,1026 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>視訊功能 - 公安便民入口</title>
+  <script src="agora-config.js"></script>
+  <script src="https://download.agora.io/sdk/release/AgoraRTC_N.js"></script>
+  <style>
+    :root { --red:#c90822; --deep-red:#a40018; --ink:#242424; --line:#d8d8d8; --paper:#f8f8f8; --muted:#707070; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; color:var(--ink); background:var(--paper); font-family:"Noto Sans TC","Microsoft JhengHei",sans-serif; }
+    a { color:inherit; text-decoration:none; }
+    .site-header { background:#fff; border-top:3px solid #1f1f1f; }
+    .masthead, .nav-inner, main, .site-footer-inner { width:min(1100px, calc(100% - 32px)); margin:auto; }
+    .masthead { min-height:96px; display:flex; align-items:center; justify-content:space-between; gap:14px; }
+    .identity { display:block; min-width:0; flex:1; }
+    .brand-left { width:100%; max-width:840px; height:auto; display:block; }
+    .brand-right { width:min(240px, 28vw); min-width:130px; height:auto; display:block; }
+    .return-home { border:1px solid #d7b8b8; border-radius:3px; color:#9c3340; padding:6px 12px; font-size:13px; }
+    .nav-bar { background:var(--red); box-shadow:0 2px 4px #0002; }
+    .nav-inner { display:flex; justify-content:space-between; }
+    .nav-inner a { color:#fff; min-width:145px; padding:13px 24px; text-align:center; font-weight:700; font-size:15px; }
+    .nav-inner a:hover, .nav-inner a.active { background:var(--deep-red); }
+    main { min-height:670px; padding:42px 0 70px; }
+    .panel { width:min(860px, 100%); margin:0 auto; background:#fff; border:1px solid #e3e3e3; border-top:4px solid var(--red); border-radius:7px 7px 3px 3px; box-shadow:0 5px 16px #00000018; padding:27px 32px 31px; }
+    .panel h1 { margin:0; color:var(--red); text-align:center; font-size:24px; letter-spacing:1px; }
+    .sub { margin:6px 0 25px; color:#9a9a9a; text-align:center; font-size:13px; line-height:1.6; }
+    .info { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:16px; }
+    .rtc-config { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px; }
+    .field label { display:block; margin:0 0 6px; color:#666; font-size:13px; font-weight:700; }
+    .field input { width:100%; min-height:38px; padding:8px 10px; border:1px solid #cfcfcf; border-radius:4px; color:#333; font:13px "Noto Sans TC","Microsoft JhengHei",sans-serif; }
+    .field input:focus { outline:2px solid #d5223740; border-color:var(--red); }
+    .box { border:1px solid #ececec; border-radius:6px; background:#fafafa; padding:14px; }
+    .box h3 { margin:0 0 8px; color:#123c77; font-size:16px; }
+    .box p { margin:0; color:#555; font-size:13px; line-height:1.7; }
+    .video-stage { margin-top:14px; border:1px solid #ddd; border-radius:8px; overflow:hidden; background:#111827; color:#fff; }
+    .video-stage .toolbar { display:flex; flex-wrap:wrap; gap:10px; padding:12px; background:#1f2937; }
+    .video-stage button { appearance:none; border:0; border-radius:8px; padding:10px 14px; font:700 14px "Noto Sans TC","Microsoft JhengHei",sans-serif; cursor:pointer; }
+    .video-stage .primary { background:#dc2626; color:#fff; }
+    .video-stage .ghost { background:#374151; color:#fff; }
+    .device-test-box { display:grid; grid-template-columns:minmax(180px, 260px) 1fr; gap:12px; padding:12px; border-top:1px solid #374151; background:#0f172a; }
+    .device-preview { min-height:150px; border:1px solid #334155; border-radius:8px; overflow:hidden; background:#020617; }
+    .device-meta { color:#cbd5e1; font-size:13px; line-height:1.7; display:grid; align-content:center; gap:4px; }
+    .device-meta strong { color:#f1f5f9; font-size:14px; }
+    .device-meta label { color:#cbd5e1; font-size:12px; font-weight:700; margin-top:2px; }
+    .device-meta select { min-height:32px; border:1px solid #334155; border-radius:6px; background:#111827; color:#e5e7eb; padding:4px 8px; font:13px "Noto Sans TC","Microsoft JhengHei",sans-serif; }
+    .device-actions { display:flex; gap:8px; flex-wrap:wrap; margin-top:4px; }
+    .device-actions button { appearance:none; border:0; border-radius:6px; padding:7px 11px; font:700 12px "Noto Sans TC","Microsoft JhengHei",sans-serif; cursor:pointer; background:#334155; color:#fff; }
+    .device-actions button[hidden] { display:none; }
+    .canvas { min-height:360px; display:grid; grid-template-columns:minmax(0, 1.7fr) minmax(300px, 1fr); gap:1px; background:#374151; }
+    .window { min-height:360px; background:#0f172a; padding:16px; display:grid; gap:14px; }
+    .window .inner { max-width:360px; }
+    .window h2 { margin:0 0 10px; font-size:26px; }
+    .window p { margin:0; color:#cbd5e1; line-height:1.7; font-size:14px; }
+    .stage-wrap { border:1px solid #334155; border-radius:10px; background:#0b1220; padding:12px; }
+    .stage-head { display:flex; justify-content:space-between; gap:12px; align-items:center; margin-bottom:10px; color:#e5e7eb; }
+    .stage-head strong { font-size:14px; }
+    .stage-head span { color:#94a3b8; font-size:12px; }
+    .side { display:grid; gap:1px; }
+    .tile { background:#111827; padding:16px; display:flex; flex-direction:column; justify-content:center; }
+    .tile strong { display:block; margin-bottom:6px; font-size:14px; }
+    .tile span { color:#cbd5e1; font-size:13px; line-height:1.6; }
+    #participantGrid { display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:10px; align-items:stretch; }
+    #participantGrid.empty::before { content:'尚未加入會議，啟動後會在這裡顯示所有參與者。'; display:block; min-height:220px; padding:18px 10px; border:1px dashed #334155; border-radius:8px; color:#94a3b8; font-size:13px; text-align:center; display:flex; align-items:center; justify-content:center; }
+    .participant-card { border:1px solid #374151; border-radius:10px; overflow:hidden; background:#0b1220; display:flex; flex-direction:column; min-height:180px; cursor:pointer; transition:transform .18s ease, border-color .18s ease, box-shadow .18s ease; }
+    .participant-card:hover { transform:translateY(-1px); border-color:#64748b; }
+    .participant-card.featured { grid-column:span 2; grid-row:span 2; border-color:#dc2626; box-shadow:0 0 0 1px #dc2626 inset; }
+    .participant-card.local .participant-head::after { content:'自己'; margin-left:auto; padding:2px 8px; border-radius:999px; background:#7f1d1d; color:#fff; font-size:11px; }
+    .participant-head { padding:8px 10px; font-size:12px; color:#cbd5e1; background:#1f2937; display:flex; align-items:center; gap:8px; }
+    .participant-media { width:100%; height:180px; background:#020617; position:relative; }
+    .participant-card.featured .participant-media { height:380px; }
+    .participant-placeholder { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; text-align:center; color:#94a3b8; font-size:13px; padding:14px; }
+    .chat-tile { align-items:stretch; }
+    .chat-list { flex:1; min-height:170px; max-height:220px; overflow:auto; border:1px solid #374151; border-radius:8px; padding:10px; background:#0b1220; }
+    .chat-empty { color:#94a3b8; font-size:12px; line-height:1.6; }
+    .chat-item { margin-bottom:8px; padding:7px 8px; border:1px solid #334155; border-radius:6px; background:#101827; }
+    .chat-item.self { border-color:#7f1d1d; background:#220f14; }
+    .chat-meta { color:#9fb0c9; font-size:11px; margin-bottom:4px; }
+    .chat-text { color:#e5e7eb; font-size:13px; line-height:1.45; white-space:pre-wrap; word-break:break-word; }
+    .chat-form { margin-top:10px; display:grid; grid-template-columns:1fr auto; gap:8px; }
+    .chat-form input { min-height:34px; border:1px solid #374151; border-radius:6px; background:#0b1220; color:#fff; padding:7px 9px; font:13px "Noto Sans TC","Microsoft JhengHei",sans-serif; }
+    .chat-form button { border:0; border-radius:6px; background:#dc2626; color:#fff; padding:0 12px; font:700 13px "Noto Sans TC","Microsoft JhengHei",sans-serif; cursor:pointer; }
+    .chat-form button:disabled, .chat-form input:disabled { opacity:.6; cursor:not-allowed; }
+    .status { margin-top:14px; padding:12px 14px; border-radius:6px; background:#f0fdf4; border:1px solid #bbf7d0; color:#166534; font-size:13px; line-height:1.6; }
+    .status.error { background:#fef2f2; border-color:#fecaca; color:#991b1b; }
+    .site-footer { background:#f0f0f0; border-top:1px solid #ddd; color:#777; }
+    .site-footer-inner { padding:17px 0; font-size:12px; text-align:center; }
+    @media (max-width:800px) {
+      .info, .canvas, .rtc-config { grid-template-columns:1fr; }
+      .device-test-box { grid-template-columns:1fr; }
+      .window, .side { min-height:auto; }
+      .participant-card.featured { grid-column:span 1; grid-row:span 1; }
+      .participant-media, .participant-card.featured .participant-media { height:220px; }
+    }
+    @media (max-width:640px) {
+      .masthead { min-height:78px; }
+      .brand-right { display:none; }
+      .brand-left { max-width:100%; }
+      .return-home { padding:5px 8px; font-size:12px; }
+      .nav-inner { overflow:auto; justify-content:flex-start; }
+      .nav-inner a { min-width:auto; white-space:nowrap; padding:12px 16px; font-size:14px; }
+      main { padding-top:28px; }
+      .panel { padding:23px 22px 27px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="masthead">
+      <a class="identity" href="zz.html" aria-label="返回首頁">
+        <img class="brand-left" src="https://cdn.phototourl.com/free/2026-07-24-aa9e6f2a-f3d3-4e47-9f03-173a0dc8ddad.png" alt="中華人民共和國公安部">
+      </a>
+      <img class="brand-right" src="https://cdn.phototourl.com/free/2026-07-24-24703616-4b7f-477d-b4c6-9d70ddd57ac8.png" alt="" aria-hidden="true">
+      <a class="return-home" href="zz.html">← 返回首頁</a>
+    </div>
+    <nav class="nav-bar"><div class="nav-inner">
+      <a href="zz.html">首頁</a><a href="mm1.html">便民服務</a><a href="case-search.html">案件查詢</a><a class="active" href="video-room.html">視訊功能</a>
+    </div></nav>
+  </header>
+
+  <main>
+    <section class="panel">
+      <h1>視訊報案後台</h1>
+      <p class="sub">這裡已接入 Agora Web SDK。App ID 與 Token 已由管理員預設，使用者只需輸入頻道與 UID 即可進入視訊。</p>
+
+      <div class="info">
+        <div class="box">
+          <h3>單位名稱</h3>
+          <p id="unitName">-</p>
+        </div>
+        <div class="box">
+          <h3>登入代碼</h3>
+          <p id="codeValue">-</p>
+        </div>
+      </div>
+
+      <div class="rtc-config">
+        <div class="field">
+          <label for="channelInput">會議頻道</label>
+          <input id="channelInput" placeholder="例如：police_room_01">
+        </div>
+        <div class="field">
+          <label for="uidInput">使用者 UID（選填）</label>
+          <input id="uidInput" placeholder="可留空由系統自動分配">
+        </div>
+      </div>
+
+      <div class="video-stage">
+        <div class="toolbar">
+          <button class="primary" id="startCallBtn" type="button">開始線上筆錄</button>
+          <button class="ghost" id="testDeviceBtn" type="button">測試本機相機與麥克風</button>
+          <button class="ghost" id="leaveBtn" type="button">離開會議</button>
+          <button class="ghost" id="muteBtn" type="button">麥克風靜音</button>
+          <button class="ghost" id="cameraBtn" type="button">鏡頭關閉</button>
+        </div>
+        <div id="deviceTestBox" class="device-test-box" hidden>
+          <div id="devicePreview" class="device-preview"></div>
+          <div class="device-meta">
+            <strong>本機裝置測試中</strong>
+            <span id="deviceTestHint">請確認已看到自己的畫面，並對著麥克風說話。</span>
+            <label for="cameraSelect">相機來源</label>
+            <select id="cameraSelect"><option value="">系統預設相機</option></select>
+            <span id="cameraStatusText">相機狀態：未測試</span>
+            <span id="micLevelText">麥克風音量：0%</span>
+            <div class="device-actions">
+              <button id="refreshDeviceBtn" type="button">重新掃描裝置</button>
+              <button id="retryCameraBtn" type="button" hidden>重試相機</button>
+            </div>
+          </div>
+        </div>
+        <div class="canvas">
+          <div class="window">
+            <div class="stage-wrap">
+              <div class="stage-head">
+                <strong>會議畫面</strong>
+                <span>所有人包含自己都會顯示在同一個多宮格，點擊任一畫面可放大。</span>
+              </div>
+              <div id="participantGrid" class="empty"></div>
+            </div>
+          </div>
+          <div class="side">
+            <div class="tile"><strong>會議狀態</strong><span id="callStatus">尚未啟動，請點擊「開始線上筆錄」。</span></div>
+            <div class="tile"><strong>會議人數</strong><span id="memberCount">0 人</span></div>
+            <div class="tile"><strong>報案提示</strong><span>可將此頁擴充成多方會議、錄影存證與留言同步。</span></div>
+            <div class="tile chat-tile">
+              <strong>會議文字訊息</strong>
+              <div id="chatList" class="chat-list"><div class="chat-empty">尚未連線聊天室。加入視訊後可即時收發文字訊息。</div></div>
+              <form id="chatForm" class="chat-form">
+                <input id="chatInput" maxlength="280" placeholder="輸入訊息後按 Enter 或送出" disabled>
+                <button id="chatSendBtn" type="submit" disabled>送出</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="status" class="status">已通過中文代碼驗證，現在可以進行視訊功能操作。</div>
+    </section>
+  </main>
+
+  <footer class="site-footer"><div class="site-footer-inner">視訊功能頁為前端入口示範，後續可替換成正式 Agora 視訊後台。</div></footer>
+
+  <script type="module">
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+    if (!window.AgoraRTC) {
+      document.querySelector('#status').className = 'status error';
+      document.querySelector('#status').textContent = 'Agora SDK 載入失敗，請檢查網路或 CDN。';
+    }
+
+    const SUPABASE_URL = 'https://nbsbbpzaubllexbxomep.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_Up5IGr7G8tE0eVEdHfqRXA_xBDFbUP-';
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+        detectSessionInUrl: false
+      }
+    });
+
+    const params = new URLSearchParams(window.location.search);
+    const unit = params.get('unit') || '-';
+    const code = params.get('code') || '-';
+    const presetChannel = params.get('channel') || '';
+    const presetUid = params.get('uid') || '';
+    const shouldAutoJoin = params.get('autojoin') === '1';
+    const cfg = window.AGORA_CONFIG || {};
+    const unitName = document.querySelector('#unitName');
+    const codeValue = document.querySelector('#codeValue');
+    const callStatus = document.querySelector('#callStatus');
+    const memberCount = document.querySelector('#memberCount');
+    const statusBox = document.querySelector('#status');
+    const startCallBtn = document.querySelector('#startCallBtn');
+    const testDeviceBtn = document.querySelector('#testDeviceBtn');
+    const leaveBtn = document.querySelector('#leaveBtn');
+    const muteBtn = document.querySelector('#muteBtn');
+    const cameraBtn = document.querySelector('#cameraBtn');
+    const participantGrid = document.querySelector('#participantGrid');
+    const channelInput = document.querySelector('#channelInput');
+    const uidInput = document.querySelector('#uidInput');
+    const deviceTestBox = document.querySelector('#deviceTestBox');
+    const devicePreview = document.querySelector('#devicePreview');
+    const deviceTestHint = document.querySelector('#deviceTestHint');
+    const cameraSelect = document.querySelector('#cameraSelect');
+    const cameraStatusText = document.querySelector('#cameraStatusText');
+    const micLevelText = document.querySelector('#micLevelText');
+    const refreshDeviceBtn = document.querySelector('#refreshDeviceBtn');
+    const retryCameraBtn = document.querySelector('#retryCameraBtn');
+    const chatList = document.querySelector('#chatList');
+    const chatForm = document.querySelector('#chatForm');
+    const chatInput = document.querySelector('#chatInput');
+    const chatSendBtn = document.querySelector('#chatSendBtn');
+
+    let muted = false;
+    let cameraOff = false;
+    let joined = false;
+    let joining = false;
+    let chatChannel = null;
+    let chatSender = '';
+    let localParticipantId = null;
+    let activeParticipantId = null;
+    let testingDevice = false;
+    let micLevelTimer = null;
+    let cameraTestError = null;
+    let cameraListCache = [];
+    const remoteUserMap = new Map();
+
+    const client = window.AgoraRTC ? AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' }) : null;
+    const localTracks = { audioTrack: null, videoTrack: null };
+    const testTracks = { audioTrack: null, videoTrack: null };
+
+    function channelFromUnit(value) {
+      const input = (value || '').trim();
+      if (!input) return 'police_room_demo';
+      let hash = '';
+      for (let i = 0; i < input.length; i += 1) {
+        hash += input.charCodeAt(i).toString(16);
+      }
+      return ('police_' + hash).slice(0, 48);
+    }
+
+    function isLikelyAgoraToken(value) {
+      const token = (value || '').trim();
+      return token.length > 40;
+    }
+
+    function isHex32(value) {
+      return /^[a-f0-9]{32}$/i.test((value || '').trim());
+    }
+
+    async function requestToken(channel, uid) {
+      const response = await fetch('/api/agora-token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ channel, uid })
+      });
+
+      const rawText = await response.text();
+      let data = {};
+      try {
+        data = rawText ? JSON.parse(rawText) : {};
+      } catch (_) {
+        data = {};
+      }
+
+      if (!response.ok) {
+        throw new Error(data.error || ('Token API 失敗（HTTP ' + response.status + '）'));
+      }
+
+      if (!data.token) {
+        throw new Error('Token API 未回傳 token。');
+      }
+
+      return {
+        token: data.token,
+        appId: String(data.appId || '').trim()
+      };
+    }
+
+    function showStatus(text, error) {
+      statusBox.textContent = text;
+      statusBox.className = error ? 'status error' : 'status';
+    }
+
+    function escapeText(value) {
+      return String(value ?? '').replace(/[&<>"']/g, (char) => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+      }[char] || char));
+    }
+
+    function chatTime(value) {
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return '--:--';
+      return date.toLocaleTimeString('zh-Hant', { hour12: false });
+    }
+
+    function setChatEnabled(enabled) {
+      chatInput.disabled = !enabled;
+      chatSendBtn.disabled = !enabled;
+    }
+
+    function appendChatMessage(payload, isSelf) {
+      const sender = escapeText(payload?.sender || '訪客');
+      const text = escapeText(payload?.text || '');
+      const time = chatTime(payload?.at || new Date().toISOString());
+
+      if (chatList.querySelector('.chat-empty')) {
+        chatList.innerHTML = '';
+      }
+
+      const row = document.createElement('div');
+      row.className = 'chat-item' + (isSelf ? ' self' : '');
+      row.innerHTML = '<div class="chat-meta">' + sender + ' · ' + time + '</div><div class="chat-text">' + text + '</div>';
+      chatList.appendChild(row);
+      chatList.scrollTop = chatList.scrollHeight;
+    }
+
+    async function stopChatSync() {
+      if (chatChannel) {
+        await supabase.removeChannel(chatChannel);
+        chatChannel = null;
+      }
+      setChatEnabled(false);
+    }
+
+    async function startChatSync(channelName, senderName) {
+      await stopChatSync();
+      chatSender = senderName;
+      const realtimeName = 'video-chat:' + channelName;
+
+      chatChannel = supabase.channel(realtimeName, {
+        config: {
+          broadcast: { self: false }
+        }
+      });
+
+      chatChannel.on('broadcast', { event: 'message' }, ({ payload }) => {
+        appendChatMessage(payload, false);
+      });
+
+      await new Promise((resolve, reject) => {
+        chatChannel.subscribe((status, err) => {
+          if (status === 'SUBSCRIBED') {
+            resolve();
+            return;
+          }
+          if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || err) {
+            reject(err || new Error('realtime subscribe failed'));
+          }
+        });
+      });
+
+      setChatEnabled(true);
+      if (chatList.querySelector('.chat-empty')) {
+        chatList.innerHTML = '';
+      }
+      appendChatMessage({ sender: '系統', text: '聊天室已連線，可開始文字通訊。', at: new Date().toISOString() }, false);
+    }
+
+    function updateMemberCount() {
+      const totalCount = remoteUserMap.size + (localParticipantId ? 1 : 0);
+      memberCount.textContent = totalCount + ' 人';
+      participantGrid.classList.toggle('empty', participantGrid.children.length === 0);
+    }
+
+    function setControlsWhenJoined(value) {
+      joined = value;
+      startCallBtn.disabled = value || joining;
+      testDeviceBtn.disabled = value || joining;
+      leaveBtn.disabled = !value;
+      muteBtn.disabled = !value;
+      cameraBtn.disabled = !value;
+      channelInput.disabled = value;
+      uidInput.disabled = value;
+      startCallBtn.textContent = value ? '已連線' : (joining ? '連線中...' : '開始線上筆錄');
+    }
+
+    function resetCallUi() {
+      participantGrid.innerHTML = '';
+      remoteUserMap.clear();
+      localParticipantId = null;
+      activeParticipantId = null;
+      updateMemberCount();
+      callStatus.textContent = '尚未啟動，請點擊「開始線上筆錄」。';
+      muteBtn.textContent = '麥克風靜音';
+      cameraBtn.textContent = '鏡頭關閉';
+      muted = false;
+      cameraOff = false;
+    }
+
+    function renderCameraOptions(cameras) {
+      const selected = cameraSelect.value;
+      const options = ['<option value="">系統預設相機</option>'];
+      cameras.forEach((camera, index) => {
+        const label = camera.label || ('相機裝置 ' + (index + 1));
+        options.push('<option value="' + escapeText(camera.deviceId || '') + '">' + escapeText(label) + '</option>');
+      });
+      cameraSelect.innerHTML = options.join('');
+
+      if (selected && cameras.some((camera) => camera.deviceId === selected)) {
+        cameraSelect.value = selected;
+      }
+    }
+
+    async function refreshCameraDevices() {
+      const cameras = await AgoraRTC.getCameras().catch(() => []);
+      cameraListCache = cameras;
+      renderCameraOptions(cameras);
+      return cameras;
+    }
+
+    async function stopDeviceTest(options = {}) {
+      const silent = Boolean(options.silent);
+
+      if (micLevelTimer) {
+        clearInterval(micLevelTimer);
+        micLevelTimer = null;
+      }
+
+      if (testTracks.audioTrack) {
+        testTracks.audioTrack.stop();
+        testTracks.audioTrack.close();
+        testTracks.audioTrack = null;
+      }
+      if (testTracks.videoTrack) {
+        testTracks.videoTrack.stop();
+        testTracks.videoTrack.close();
+        testTracks.videoTrack = null;
+      }
+
+      testingDevice = false;
+      cameraTestError = null;
+      deviceTestBox.hidden = true;
+      devicePreview.innerHTML = '';
+      micLevelText.textContent = '麥克風音量：0%';
+      cameraStatusText.textContent = '相機狀態：未測試';
+      deviceTestHint.textContent = '請確認已看到自己的畫面，並對著麥克風說話。';
+      testDeviceBtn.textContent = '測試本機相機與麥克風';
+      retryCameraBtn.hidden = true;
+
+      if (!silent) {
+        showStatus('已結束本機裝置測試。', false);
+      }
+    }
+
+    function prettyMediaError(error) {
+      if (!error) return '未知錯誤';
+      const message = String(error.message || error.name || '未知錯誤');
+      const normalized = message.toUpperCase();
+
+      if (normalized.includes('NOTREADABLEERROR') || normalized.includes('TRACK_IS_DISABLED') || normalized.includes('NOT_READABLE')) {
+        return '可能被其他程式占用';
+      }
+      if (normalized.includes('PERMISSION_DENIED') || normalized.includes('NOTALLOWEDERROR')) {
+        return '瀏覽器權限被拒絕';
+      }
+      if (normalized.includes('NOTFOUNDERROR') || normalized.includes('DEVICE_NOT_FOUND') || normalized.includes('DEVICENOTFOUNDERROR')) {
+        return '瀏覽器找不到相機裝置';
+      }
+
+      return message;
+    }
+
+    async function retryCameraTrackOnly() {
+      if (!testingDevice) {
+        showStatus('請先啟動裝置測試。', true);
+        return;
+      }
+
+      try {
+        refreshDeviceBtn.disabled = true;
+        if (testTracks.videoTrack) {
+          testTracks.videoTrack.stop();
+          testTracks.videoTrack.close();
+          testTracks.videoTrack = null;
+        }
+
+        await refreshCameraDevices();
+        const selectedCameraId = cameraSelect.value.trim();
+        testTracks.videoTrack = selectedCameraId
+          ? await AgoraRTC.createCameraVideoTrack({ cameraId: selectedCameraId })
+          : await AgoraRTC.createCameraVideoTrack();
+        devicePreview.innerHTML = '';
+        testTracks.videoTrack.play(devicePreview);
+        cameraTestError = null;
+        cameraStatusText.textContent = '相機狀態：可用';
+        retryCameraBtn.hidden = true;
+        showStatus('相機已恢復可用。', false);
+      } catch (error) {
+        cameraTestError = error;
+        const reason = prettyMediaError(error);
+        cameraStatusText.textContent = '相機狀態：不可用（' + reason + '）';
+        showStatus('相機仍不可用：' + reason, true);
+      } finally {
+        refreshDeviceBtn.disabled = false;
+      }
+    }
+
+    async function startDeviceTest() {
+      if (!window.AgoraRTC) {
+        showStatus('Agora SDK 尚未可用，暫時無法進行裝置測試。', true);
+        return;
+      }
+      if (joining) {
+        showStatus('連線處理中，請稍後再測試。', true);
+        return;
+      }
+      if (joined) {
+        showStatus('已在會議中，鏡頭與麥克風可直接於會議內測試。', true);
+        return;
+      }
+      if (testingDevice) {
+        await stopDeviceTest();
+        return;
+      }
+
+      try {
+        let cameraError = null;
+        let micError = null;
+
+        const cameras = await refreshCameraDevices();
+        const selectedCameraId = cameraSelect.value.trim();
+
+        try {
+          testTracks.videoTrack = selectedCameraId
+            ? await AgoraRTC.createCameraVideoTrack({ cameraId: selectedCameraId })
+            : await AgoraRTC.createCameraVideoTrack();
+        } catch (error) {
+          cameraError = error;
+        }
+
+        try {
+          testTracks.audioTrack = await AgoraRTC.createMicrophoneAudioTrack();
+        } catch (error) {
+          micError = error;
+        }
+
+        const microphones = await AgoraRTC.getMicrophones().catch(() => []);
+
+        if (!testTracks.videoTrack && !testTracks.audioTrack) {
+          const camMsg = cameraError?.message ? String(cameraError.message) : '相機不可用';
+          const micMsg = micError?.message ? String(micError.message) : '麥克風不可用';
+          throw new Error('相機：' + camMsg + '；麥克風：' + micMsg + '。');
+        }
+
+        cameraTestError = cameraError;
+
+        testingDevice = true;
+        testDeviceBtn.textContent = '結束裝置測試';
+        deviceTestBox.hidden = false;
+        if (testTracks.videoTrack) {
+          devicePreview.innerHTML = '';
+          testTracks.videoTrack.play(devicePreview);
+          cameraStatusText.textContent = '相機狀態：可用';
+          retryCameraBtn.hidden = true;
+        } else {
+          devicePreview.innerHTML = '<div class="participant-placeholder">未啟用相機（可先測試麥克風）</div>';
+          const reason = prettyMediaError(cameraError);
+          cameraStatusText.textContent = '相機狀態：不可用（' + reason + '）';
+          if (cameras.length > 1) {
+            deviceTestHint.textContent = '偵測到多個相機來源，請切換「相機來源」後按「重試相機」。';
+          }
+          retryCameraBtn.hidden = false;
+        }
+
+        if (!window.isSecureContext) {
+          deviceTestHint.textContent = '目前網站不是安全連線（HTTPS），部分瀏覽器可能限制相機/麥克風。';
+        } else if (!cameras.length || !microphones.length) {
+          deviceTestHint.textContent = '已拿到裝置權限；若仍異常，請檢查瀏覽器網站權限與其他軟體是否占用鏡頭。';
+        }
+
+        if (testTracks.audioTrack) {
+          const updateMicLevel = () => {
+            const level = Math.round((testTracks.audioTrack?.getVolumeLevel?.() || 0) * 100);
+            micLevelText.textContent = '麥克風音量：' + level + '%';
+          };
+
+          updateMicLevel();
+          micLevelTimer = setInterval(updateMicLevel, 500);
+        } else {
+          micLevelText.textContent = '麥克風音量：未偵測到麥克風';
+        }
+
+        if (testTracks.videoTrack && testTracks.audioTrack) {
+          showStatus('本機測試已啟動，請確認畫面與麥克風音量是否有變化。', false);
+        } else if (testTracks.videoTrack) {
+          showStatus('本機測試已啟動：相機可用，麥克風目前不可用。', false);
+        } else {
+          showStatus('本機測試已啟動：麥克風可用，相機目前不可用。', false);
+        }
+      } catch (error) {
+        await stopDeviceTest({ silent: true });
+        const rawMessage = error && error.message ? String(error.message) : '未知錯誤';
+        const normalized = rawMessage.toUpperCase();
+        const cameras = await AgoraRTC.getCameras().catch(() => []);
+        const microphones = await AgoraRTC.getMicrophones().catch(() => []);
+        const envHint = '（HTTPS：' + (window.isSecureContext ? '是' : '否') + '，相機數：' + cameras.length + '，麥克風數：' + microphones.length + '）';
+        if (normalized.includes('PERMISSION_DENIED') || normalized.includes('NOTALLOWEDERROR')) {
+          showStatus('裝置測試失敗：瀏覽器未授權相機或麥克風，請先允許後再重試。' + envHint, true);
+          return;
+        }
+        if (normalized.includes('NOTFOUNDERROR') || normalized.includes('DEVICE_NOT_FOUND') || normalized.includes('DEVICENOTFOUNDERROR')) {
+          showStatus('裝置測試失敗：瀏覽器回報找不到可用相機或麥克風，請確認裝置未被其他程式占用，並重新整理後重試。' + envHint, true);
+          return;
+        }
+        if (!window.isSecureContext) {
+          showStatus('裝置測試失敗：目前網頁不是 HTTPS 安全環境，瀏覽器可能封鎖相機/麥克風。請改用 HTTPS 網址測試。', true);
+          return;
+        }
+        showStatus('裝置測試失敗：' + rawMessage + envHint, true);
+      }
+    }
+
+    function setActiveParticipant(participantId) {
+      activeParticipantId = participantId;
+      Array.from(participantGrid.querySelectorAll('.participant-card')).forEach((card) => {
+        card.classList.toggle('featured', card.dataset.participantId === participantId);
+      });
+    }
+
+    function ensureParticipantCard(participantId, label, isLocal) {
+      const id = 'participant_' + participantId.replace(/[^a-zA-Z0-9_-]/g, '_');
+      let card = document.getElementById(id);
+      if (!card) {
+        card = document.createElement('div');
+        card.className = 'participant-card' + (isLocal ? ' local' : '');
+        card.id = id;
+        card.dataset.participantId = participantId;
+        card.innerHTML = '<div class="participant-head">' + escapeText(label) + '</div><div class="participant-media" id="media_' + id + '"><div class="participant-placeholder">等待視訊畫面...</div></div>';
+        card.addEventListener('click', () => setActiveParticipant(participantId));
+        participantGrid.appendChild(card);
+      }
+
+      if (!activeParticipantId) {
+        setActiveParticipant(participantId);
+      }
+
+      updateMemberCount();
+      return document.getElementById('media_' + id);
+    }
+
+    function showPlaceholder(container, text) {
+      container.innerHTML = '<div class="participant-placeholder">' + escapeText(text) + '</div>';
+    }
+
+    function removeParticipantCard(participantId) {
+      const domId = 'participant_' + participantId.replace(/[^a-zA-Z0-9_-]/g, '_');
+      const card = document.getElementById(domId);
+      if (card && card.parentNode) {
+        card.parentNode.removeChild(card);
+      }
+
+      if (activeParticipantId === participantId) {
+        const nextCard = participantGrid.querySelector('.participant-card');
+        activeParticipantId = null;
+        if (nextCard) {
+          setActiveParticipant(nextCard.dataset.participantId);
+        }
+      }
+
+      updateMemberCount();
+    }
+
+    async function joinAgora() {
+      if (!client) {
+        showStatus('Agora 尚未可用，請檢查 SDK 載入。', true);
+        return;
+      }
+
+      if (joined || joining) {
+        showStatus('目前正在連線或已在會議中，請稍候。', true);
+        return;
+      }
+
+      const appId = String(cfg.appId || '').trim();
+      const tokenRaw = String(cfg.token || '').trim();
+      const channel = channelInput.value.trim();
+      const rawUid = uidInput.value.trim();
+
+      if (!appId) {
+        showStatus('系統尚未完成視訊設定（缺少 App ID），請聯絡管理員。', true);
+        return;
+      }
+
+      if (!channel) {
+        showStatus('請先輸入會議頻道。', true);
+        return;
+      }
+
+      if (tokenRaw && isHex32(tokenRaw)) {
+        showStatus('系統 Token 設定格式不正確，請聯絡管理員更新 RTC Token。', true);
+        return;
+      }
+
+      if (tokenRaw && !isLikelyAgoraToken(tokenRaw)) {
+        showStatus('系統 Token 長度不正確，請聯絡管理員更新 RTC Token。', true);
+        return;
+      }
+
+      joining = true;
+      setControlsWhenJoined(false);
+      callStatus.textContent = '連線中，請稍候...';
+
+      try {
+        if (testingDevice) {
+          await stopDeviceTest({ silent: true });
+        }
+
+        const uid = rawUid ? Number(rawUid) || rawUid : Math.floor(100000 + Math.random() * 900000);
+        if (!rawUid) {
+          uidInput.value = String(uid);
+        }
+
+        let token = tokenRaw;
+        let joinAppId = appId;
+
+        if (!tokenRaw) {
+          const tokenData = await requestToken(channel, uid);
+          token = tokenData.token;
+          if (tokenData.appId) {
+            if (joinAppId && tokenData.appId !== joinAppId) {
+              showStatus('偵測到 Token API 與前端 App ID 不一致，已自動使用後端設定繼續連線。', false);
+            }
+            joinAppId = tokenData.appId;
+          }
+        }
+
+        if (!joinAppId) {
+          throw new Error('Token API 未提供 App ID，且前端未設定 App ID。');
+        }
+
+        const joinedUid = await client.join(joinAppId, channel, token, uid);
+        localParticipantId = 'local:' + joinedUid;
+        const senderName = (unit && unit !== '-' ? unit : '訪客單位') + '#' + joinedUid;
+        const localMediaPlayer = ensureParticipantCard(localParticipantId, '自己 UID：' + joinedUid, true);
+        await startChatSync(channel, senderName);
+
+        let mediaReady = false;
+        try {
+          const tracks = await AgoraRTC.createMicrophoneAndCameraTracks();
+          localTracks.audioTrack = tracks[0];
+          localTracks.videoTrack = tracks[1];
+
+          localMediaPlayer.innerHTML = '';
+          localTracks.videoTrack.play(localMediaPlayer);
+          await client.publish([localTracks.audioTrack, localTracks.videoTrack]);
+          mediaReady = true;
+        } catch (mediaError) {
+          const mediaMessage = mediaError && mediaError.message ? String(mediaError.message).toUpperCase() : '';
+          const canFallback =
+            mediaMessage.includes('PERMISSION_DENIED') ||
+            mediaMessage.includes('NOTALLOWEDERROR') ||
+            mediaMessage.includes('DEVICE_NOT_FOUND') ||
+            mediaMessage.includes('NOTFOUNDERROR');
+
+          if (!canFallback) {
+            throw mediaError;
+          }
+
+          showPlaceholder(localMediaPlayer, '已加入會議，但未啟用本機鏡頭。');
+        }
+
+        setControlsWhenJoined(true);
+        if (mediaReady) {
+          callStatus.textContent = '已加入頻道：' + channel + '（本機 UID：' + joinedUid + '）';
+          showStatus('視訊已啟動，正在進行多人會議。', false);
+        } else {
+          callStatus.textContent = '已加入頻道：' + channel + '（本機 UID：' + joinedUid + '），目前為純文字/收看模式。';
+          muteBtn.disabled = true;
+          cameraBtn.disabled = true;
+          showStatus('已成功進入會議，但相機/麥克風未授權。你仍可使用聊天室與接收遠端影音。', false);
+        }
+      } catch (error) {
+        const rawMessage = error && error.message ? error.message : '未知錯誤';
+        const normalized = String(rawMessage).toUpperCase();
+
+        if (normalized.includes('PERMISSION_DENIED') || normalized.includes('NOTALLOWEDERROR')) {
+          try {
+            await client.leave();
+          } catch (_) {
+            // ignore leave errors during permission recovery
+          }
+          resetCallUi();
+          callStatus.textContent = '尚未啟動，請允許相機與麥克風權限後重試。';
+          showStatus('開始線上筆錄失敗：瀏覽器拒絕相機或麥克風權限。請點網址列左側的網站設定，將 Camera/Microphone 改為 Allow，重新整理後再試。', true);
+          return;
+        }
+
+        if (normalized.includes('ALREADY IN CONNECTING/CONNECTED STATE')) {
+          try {
+            await client.leave();
+          } catch (_) {
+            // ignore leave errors during recovery
+          }
+          resetCallUi();
+          showStatus('連線程序重疊，已嘗試重置連線。請再按一次「開始線上筆錄」。', true);
+          return;
+        }
+
+        if (normalized.includes('CAN_NOT_GET_GATEWAY_SERVER') || normalized.includes('DYNAMIC USE STATIC KEY')) {
+          const hint = tokenRaw
+            ? '請確認系統預設 Token 與 App ID、頻道名稱一致，且 Token 尚未過期。'
+            : '此 Agora 專案需要 Token。請確認後端 Token API 與環境變數已設定。';
+          showStatus('開始線上筆錄失敗：' + hint, true);
+          return;
+        }
+
+        if (normalized.includes('INVALID APP ID')) {
+          showStatus('開始線上筆錄失敗：App ID 無效，請確認貼上的是 Agora Console 的專案 App ID。', true);
+          return;
+        }
+
+        if (normalized.includes('TOKEN EXPIRED')) {
+          showStatus('開始線上筆錄失敗：Token 已過期，請重新簽發 Token。', true);
+          return;
+        }
+
+        showStatus('開始線上筆錄失敗：' + rawMessage, true);
+      } finally {
+        joining = false;
+        setControlsWhenJoined(joined);
+      }
+    }
+
+    async function leaveAgora() {
+      if (!client || joining) return;
+      if (!joined) return;
+      try {
+        await stopChatSync();
+
+        if (localTracks.audioTrack) {
+          localTracks.audioTrack.stop();
+          localTracks.audioTrack.close();
+        }
+        if (localTracks.videoTrack) {
+          localTracks.videoTrack.stop();
+          localTracks.videoTrack.close();
+        }
+        localTracks.audioTrack = null;
+        localTracks.videoTrack = null;
+        await client.leave();
+      } finally {
+        setControlsWhenJoined(false);
+        resetCallUi();
+        showStatus('已離開視訊會議。', false);
+      }
+    }
+
+    unitName.textContent = unit;
+    codeValue.textContent = code;
+    channelInput.value = presetChannel || cfg.channel || channelFromUnit(unit);
+    uidInput.value = presetUid || cfg.uid || '';
+
+    setControlsWhenJoined(false);
+    leaveBtn.disabled = true;
+    muteBtn.disabled = true;
+    cameraBtn.disabled = true;
+
+    if (client) {
+      client.on('user-published', async (user, mediaType) => {
+        await client.subscribe(user, mediaType);
+        remoteUserMap.set(user.uid, user);
+        const participantId = 'remote:' + user.uid;
+        const player = ensureParticipantCard(participantId, '參與者 UID：' + user.uid, false);
+
+        if (mediaType === 'video') {
+          player.innerHTML = '';
+          user.videoTrack.play(player);
+        }
+        if (mediaType === 'audio') {
+          user.audioTrack.play();
+          if (mediaType !== 'video' && !user.videoTrack) {
+            showPlaceholder(player, '對方目前僅開啟語音。');
+          }
+        }
+
+        updateMemberCount();
+      });
+
+      client.on('user-unpublished', (user, mediaType) => {
+        const participantId = 'remote:' + user.uid;
+        if (mediaType === 'video') {
+          const player = ensureParticipantCard(participantId, '參與者 UID：' + user.uid, false);
+          showPlaceholder(player, '對方已關閉鏡頭。');
+        }
+      });
+
+      client.on('user-left', (user) => {
+        remoteUserMap.delete(user.uid);
+        removeParticipantCard('remote:' + user.uid);
+      });
+    }
+
+    startCallBtn.addEventListener('click', joinAgora);
+    testDeviceBtn.addEventListener('click', startDeviceTest);
+    refreshDeviceBtn.addEventListener('click', async () => {
+      const cameras = await refreshCameraDevices();
+      if (!cameras.length) {
+        showStatus('目前仍未偵測到相機裝置，請確認 Windows 相機權限與裝置連線。', true);
+        return;
+      }
+      showStatus('已重新掃描裝置，請選擇相機來源後重試。', false);
+    });
+    retryCameraBtn.addEventListener('click', retryCameraTrackOnly);
+    leaveBtn.addEventListener('click', leaveAgora);
+
+    if (window.AgoraRTC) {
+      refreshCameraDevices();
+      if (navigator.mediaDevices && navigator.mediaDevices.addEventListener) {
+        navigator.mediaDevices.addEventListener('devicechange', () => {
+          refreshCameraDevices();
+        });
+      }
+    }
+
+    if (shouldAutoJoin) {
+      window.addEventListener('load', () => {
+        if (!joined && !joining) {
+          joinAgora();
+        }
+      }, { once: true });
+    }
+
+    muteBtn.addEventListener('click', async () => {
+      if (!localTracks.audioTrack) return;
+      muted = !muted;
+      await localTracks.audioTrack.setEnabled(!muted);
+      muteBtn.textContent = muted ? '取消靜音' : '麥克風靜音';
+      callStatus.textContent = muted ? '麥克風已靜音。' : '麥克風已開啟。';
+    });
+
+    cameraBtn.addEventListener('click', async () => {
+      if (!localTracks.videoTrack) return;
+      cameraOff = !cameraOff;
+      await localTracks.videoTrack.setEnabled(!cameraOff);
+      cameraBtn.textContent = cameraOff ? '鏡頭開啟' : '鏡頭關閉';
+      callStatus.textContent = cameraOff ? '鏡頭已關閉。' : '鏡頭已開啟。';
+    });
+
+    chatForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      if (!joined || !chatChannel) {
+        showStatus('請先開始線上筆錄後再發送訊息。', true);
+        return;
+      }
+
+      const text = chatInput.value.trim();
+      if (!text) return;
+
+      const payload = {
+        sender: chatSender || (unit && unit !== '-' ? unit : '訪客'),
+        text,
+        at: new Date().toISOString()
+      };
+
+      const sendResult = await chatChannel.send({
+        type: 'broadcast',
+        event: 'message',
+        payload
+      });
+
+      if (sendResult !== 'ok') {
+        showStatus('文字訊息發送失敗，請確認 Realtime 功能已啟用。', true);
+        return;
+      }
+
+      appendChatMessage(payload, true);
+      chatInput.value = '';
+      chatInput.focus();
+    });
+
+    window.addEventListener('beforeunload', () => {
+      if (joined) {
+        leaveAgora();
+      }
+      stopDeviceTest({ silent: true });
+      stopChatSync();
+    });
+  </script>
+</body>
+</html>
