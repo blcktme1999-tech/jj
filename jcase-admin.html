@@ -103,7 +103,7 @@
         <div class="login-grid">
           <div class="field">
             <label for="adminLogin">登入帳號</label>
-            <input id="adminLogin" value="blcktme1999" readonly>
+            <input id="adminLogin" value="blcktme1999" autocomplete="username" placeholder="請輸入登入帳號">
           </div>
           <div class="field">
             <label for="password">密碼</label>
@@ -228,7 +228,6 @@
     const deleteRecordBtn = document.querySelector('#deleteRecordBtn');
     const addPhotoBtn = document.querySelector('#addPhotoBtn');
 
-    const SHARED_ADMIN_LOGIN = 'blcktme1999';
     const API_ROUTE_ALIASES = {
       '/api/admin/login': '/api/admin/jlogin',
       '/api/admin/logout': '/api/admin/jlogout',
@@ -474,11 +473,6 @@
 
       if (!loginId || !password) {
         showMessage('請先輸入帳號與密碼。', 'error');
-        return;
-      }
-
-      if (loginId !== SHARED_ADMIN_LOGIN) {
-        showMessage('登入失敗：請使用指定的管理員帳號。', 'error');
         return;
       }
 
