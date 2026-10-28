@@ -428,13 +428,16 @@
       });
 
       await new Promise((resolve, reject) => {
+        const timer = setTimeout(() => reject(new Error('聊天室連線逾時')), 8000);
         chatChannel.subscribe((status, err) => {
           if (status === 'SUBSCRIBED') {
+            clearTimeout(timer);
             resolve();
             return;
           }
-          if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || err) {
-            reject(err || new Error('realtime subscribe failed'));
+          if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED' || err) {
+            clearTimeout(timer);
+            reject(err || new Error('聊天室連線失敗'));
           }
         });
       });
@@ -797,6 +800,7 @@
 
       joining = true;
       setControlsWhenJoined(false);
+      showStatus('', false);
       callStatus.textContent = '連線中，請稍候...';
 
       try {
@@ -836,7 +840,12 @@
         localParticipantId = 'local:' + joinedUid;
         const senderName = (unit && unit !== '-' ? unit : '訪客單位') + '#' + joinedUid;
         const localMediaPlayer = ensureParticipantCard(localParticipantId, '自己 UID：' + joinedUid, true);
-        await startChatSync(channel, senderName);
+        callStatus.textContent = '已加入頻道：' + channel + '（本機 UID：' + joinedUid + '）';
+        setControlsWhenJoined(true);
+        showStatus('已進入會議，正在開啟鏡頭與聊天室。', false);
+        startChatSync(channel, senderName).catch((chatError) => {
+          showStatus('視訊已加入，聊天室未連上：' + (chatError && chatError.message ? chatError.message : '未知錯誤'), true);
+        });
 
         let mediaReady = false;
         try {
@@ -856,7 +865,7 @@
             mediaMessage.includes('DEVICE_NOT_FOUND') ||
             mediaMessage.includes('NOTFOUNDERROR');
 
-          if (!canFallback) {
+          if (!canFallback && !mediaMessage.includes('TRANSPORT FAILURE') && !mediaMessage.includes('CHANNEL ERROR')) {
             throw mediaError;
           }
 
