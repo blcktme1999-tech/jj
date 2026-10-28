@@ -378,7 +378,7 @@
       };
 
       if (aliasPath) {
-        return [normalizeApiUrl(source), normalizeApiUrl(aliasPath + query)];
+        return [normalizeApiUrl(aliasPath + query), normalizeApiUrl(source)];
       }
 
       return [normalizeApiUrl(source)];

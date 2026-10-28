@@ -144,7 +144,9 @@ function formatSupabaseError(error, fallbackMessage) {
 
 app.post('/api/admin/login', (req, res) => {
   const { loginId, password } = req.body || {};
-  if (loginId !== SHARED_ADMIN_LOGIN || password !== SHARED_ADMIN_PASSWORD) {
+  const configuredLogin = String(SHARED_ADMIN_LOGIN || '').trim();
+  const configuredPassword = String(SHARED_ADMIN_PASSWORD || '').trim();
+  if (String(loginId || '').trim() !== configuredLogin || String(password || '').trim() !== configuredPassword) {
     res.status(401).json({ error: '帳號或密碼錯誤。' });
     return;
   }

@@ -10,9 +10,16 @@ module.exports = async function handler(req, res) {
     const { sharedAdminLogin, sharedAdminPassword } = getConfig();
     const body = await getJsonBody(req);
     const loginId = String(body?.loginId || '').trim();
-    const password = String(body?.password || '');
+    const password = String(body?.password || '').trim();
+    const configuredLogin = String(sharedAdminLogin || '').trim();
+    const configuredPassword = String(sharedAdminPassword || '').trim();
 
-    if (loginId !== sharedAdminLogin || password !== sharedAdminPassword) {
+    if (!loginId || !password) {
+      json(res, 400, { error: '伺服器沒有收到帳號或密碼。' });
+      return;
+    }
+
+    if (loginId !== configuredLogin || password !== configuredPassword) {
       json(res, 401, { error: '帳號或密碼錯誤。' });
       return;
     }

@@ -276,6 +276,9 @@
     let cameraListCache = [];
     const remoteUserMap = new Map();
 
+    if (window.AgoraRTC && typeof AgoraRTC.setArea === 'function') {
+      AgoraRTC.setArea({ areaCode: ['ASIA', 'GLOBAL'] });
+    }
     const client = window.AgoraRTC ? AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' }) : null;
     const localTracks = { audioTrack: null, videoTrack: null };
     const testTracks = { audioTrack: null, videoTrack: null };
@@ -793,7 +796,31 @@
           throw new Error('Token API 未提供 App ID，且前端未設定 App ID。');
         }
 
-        const joinedUid = await client.join(joinAppId, channel, token, uid);
+        async function joinChannel() {
+          return client.join(joinAppId, channel, token || null, uid);
+        }
+
+        let joinedUid;
+        try {
+          joinedUid = await joinChannel();
+        } catch (joinError) {
+          const joinMessage = String(joinError && joinError.message || '');
+          const canRetry = /transport failure|CAN_NOT_GET_GATEWAY|TIMEOUT/i.test(joinMessage);
+          if (!canRetry || typeof client.startProxyServer !== 'function') {
+            throw joinError;
+          }
+          try {
+            await client.leave();
+          } catch (_) {
+            // The failed join may not have a session to leave.
+          }
+          const proxyStarted = client.startProxyServer(3);
+          if (proxyStarted && typeof proxyStarted.then === 'function') {
+            await proxyStarted;
+          }
+          callStatus.textContent = '直連失敗，改用加密代理連線...';
+          joinedUid = await joinChannel();
+        }
         localParticipantId = 'local:' + joinedUid;
         const senderName = (unit && unit !== '-' ? unit : '訪客單位') + '#' + joinedUid;
         const localMediaPlayer = ensureParticipantCard(localParticipantId, '自己 UID：' + joinedUid, true);

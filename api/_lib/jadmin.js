@@ -116,6 +116,13 @@ function hasAdminSession(req) {
 }
 
 async function getJsonBody(req) {
+  if (typeof req.body === 'string') {
+    return req.body ? JSON.parse(req.body) : {};
+  }
+  if (Buffer.isBuffer(req.body)) {
+    const text = req.body.toString('utf8');
+    return text ? JSON.parse(text) : {};
+  }
   if (req.body && typeof req.body === 'object') {
     return req.body;
   }

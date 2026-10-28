@@ -1,4 +1,4 @@
-const { RtcTokenBuilder, RtcRole } = require('agora-access-token');
+const { RtcTokenBuilder, RtcRole } = require('agora-token');
 
 function json(res, statusCode, payload) {
   res.statusCode = statusCode;
@@ -91,7 +91,6 @@ module.exports = async function handler(req, res) {
     }
 
     const now = Math.floor(Date.now() / 1000);
-    // Some validators still expect 32-bit Unix time; cap expiry to avoid invalid future claims.
     const maxUnixSeconds = 2147483647 - 60;
     const desiredExpiresIn = resolveExpiresIn();
     const expiresAt = Math.min(now + desiredExpiresIn, maxUnixSeconds);
@@ -100,9 +99,9 @@ module.exports = async function handler(req, res) {
 
     let token;
     if (typeof uid === 'number') {
-      token = RtcTokenBuilder.buildTokenWithUid(appId, appCertificate, channel, uid, role, expiresAt);
+      token = RtcTokenBuilder.buildTokenWithUid(appId, appCertificate, channel, uid, role, expiresIn, expiresIn);
     } else {
-      token = RtcTokenBuilder.buildTokenWithAccount(appId, appCertificate, channel, uid, role, expiresAt);
+      token = RtcTokenBuilder.buildTokenWithUserAccount(appId, appCertificate, channel, uid, role, expiresIn, expiresIn);
     }
 
     json(res, 200, {
