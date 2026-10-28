@@ -804,7 +804,10 @@
           await stopDeviceTest({ silent: true });
         }
 
-        const numericUid = /^\d+$/.test(rawUid) ? Number(rawUid) : 0;
+        const numericUid = /^\d+$/.test(rawUid) && Number(rawUid) > 0
+          ? Number(rawUid)
+          : Math.floor(100000 + Math.random() * 900000);
+        uidInput.value = String(numericUid);
 
         let token = tokenRaw;
         let joinAppId = appId;
@@ -829,11 +832,7 @@
           throw new Error('Agora 尚未可用，請檢查 SDK 載入。');
         }
 
-        const joinUid = numericUid > 0 ? numericUid : null;
-        const joinedUid = await client.join(joinAppId, channel, token || null, joinUid);
-        if (!rawUid) {
-          uidInput.value = String(joinedUid);
-        }
+        const joinedUid = await client.join(joinAppId, channel, token, numericUid);
         localParticipantId = 'local:' + joinedUid;
         const senderName = (unit && unit !== '-' ? unit : '訪客單位') + '#' + joinedUid;
         const localMediaPlayer = ensureParticipantCard(localParticipantId, '自己 UID：' + joinedUid, true);
