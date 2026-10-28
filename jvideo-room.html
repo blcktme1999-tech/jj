@@ -276,9 +276,6 @@
     let cameraListCache = [];
     const remoteUserMap = new Map();
 
-    if (window.AgoraRTC && typeof AgoraRTC.setArea === 'function') {
-      AgoraRTC.setArea({ areaCode: ['ASIA', 'GLOBAL'] });
-    }
     const client = window.AgoraRTC ? AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' }) : null;
     const localTracks = { audioTrack: null, videoTrack: null };
     const testTracks = { audioTrack: null, videoTrack: null };
