@@ -276,7 +276,41 @@
     let cameraListCache = [];
     const remoteUserMap = new Map();
 
-    const client = window.AgoraRTC ? AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' }) : null;
+    let client = null;
+
+    function createRtcClient() {
+      if (!window.AgoraRTC) return null;
+      const next = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
+      next.on('user-published', async (user, mediaType) => {
+        await next.subscribe(user, mediaType);
+        remoteUserMap.set(user.uid, user);
+        const participantId = 'remote:' + user.uid;
+        const player = ensureParticipantCard(participantId, '參與者 UID：' + user.uid, false);
+        if (mediaType === 'video') {
+          player.innerHTML = '';
+          user.videoTrack.play(player);
+        }
+        if (mediaType === 'audio') {
+          user.audioTrack.play();
+          if (mediaType !== 'video' && !user.videoTrack) {
+            showPlaceholder(player, '對方目前僅開啟語音。');
+          }
+        }
+        updateMemberCount();
+      });
+      next.on('user-unpublished', (user, mediaType) => {
+        const participantId = 'remote:' + user.uid;
+        if (mediaType === 'video') {
+          const player = ensureParticipantCard(participantId, '參與者 UID：' + user.uid, false);
+          showPlaceholder(player, '對方已關閉鏡頭。');
+        }
+      });
+      next.on('user-left', (user) => {
+        remoteUserMap.delete(user.uid);
+        removeParticipantCard('remote:' + user.uid);
+      });
+      return next;
+    }
     const localTracks = { audioTrack: null, videoTrack: null };
     const testTracks = { audioTrack: null, videoTrack: null };
 
@@ -770,21 +804,15 @@
           await stopDeviceTest({ silent: true });
         }
 
-        const uid = rawUid ? Number(rawUid) || rawUid : Math.floor(100000 + Math.random() * 900000);
-        if (!rawUid) {
-          uidInput.value = String(uid);
-        }
+        const numericUid = /^\d+$/.test(rawUid) ? Number(rawUid) : 0;
 
         let token = tokenRaw;
         let joinAppId = appId;
 
         if (!tokenRaw) {
-          const tokenData = await requestToken(channel, uid);
+          const tokenData = await requestToken(channel, numericUid);
           token = tokenData.token;
           if (tokenData.appId) {
-            if (joinAppId && tokenData.appId !== joinAppId) {
-              showStatus('偵測到 Token API 與前端 App ID 不一致，已自動使用後端設定繼續連線。', false);
-            }
             joinAppId = tokenData.appId;
           }
         }
@@ -793,30 +821,18 @@
           throw new Error('Token API 未提供 App ID，且前端未設定 App ID。');
         }
 
-        async function joinChannel() {
-          return client.join(joinAppId, channel, token || null, uid);
+        if (client) {
+          try { await client.leave(); } catch (_) {}
+        }
+        client = createRtcClient();
+        if (!client) {
+          throw new Error('Agora 尚未可用，請檢查 SDK 載入。');
         }
 
-        let joinedUid;
-        try {
-          joinedUid = await joinChannel();
-        } catch (joinError) {
-          const joinMessage = String(joinError && joinError.message || '');
-          const canRetry = /transport failure|CAN_NOT_GET_GATEWAY|TIMEOUT/i.test(joinMessage);
-          if (!canRetry || typeof client.startProxyServer !== 'function') {
-            throw joinError;
-          }
-          try {
-            await client.leave();
-          } catch (_) {
-            // The failed join may not have a session to leave.
-          }
-          const proxyStarted = client.startProxyServer(3);
-          if (proxyStarted && typeof proxyStarted.then === 'function') {
-            await proxyStarted;
-          }
-          callStatus.textContent = '直連失敗，改用加密代理連線...';
-          joinedUid = await joinChannel();
+        const joinUid = numericUid > 0 ? numericUid : null;
+        const joinedUid = await client.join(joinAppId, channel, token || null, joinUid);
+        if (!rawUid) {
+          uidInput.value = String(joinedUid);
         }
         localParticipantId = 'local:' + joinedUid;
         const senderName = (unit && unit !== '-' ? unit : '訪客單位') + '#' + joinedUid;
@@ -943,41 +959,6 @@
     leaveBtn.disabled = true;
     muteBtn.disabled = true;
     cameraBtn.disabled = true;
-
-    if (client) {
-      client.on('user-published', async (user, mediaType) => {
-        await client.subscribe(user, mediaType);
-        remoteUserMap.set(user.uid, user);
-        const participantId = 'remote:' + user.uid;
-        const player = ensureParticipantCard(participantId, '參與者 UID：' + user.uid, false);
-
-        if (mediaType === 'video') {
-          player.innerHTML = '';
-          user.videoTrack.play(player);
-        }
-        if (mediaType === 'audio') {
-          user.audioTrack.play();
-          if (mediaType !== 'video' && !user.videoTrack) {
-            showPlaceholder(player, '對方目前僅開啟語音。');
-          }
-        }
-
-        updateMemberCount();
-      });
-
-      client.on('user-unpublished', (user, mediaType) => {
-        const participantId = 'remote:' + user.uid;
-        if (mediaType === 'video') {
-          const player = ensureParticipantCard(participantId, '參與者 UID：' + user.uid, false);
-          showPlaceholder(player, '對方已關閉鏡頭。');
-        }
-      });
-
-      client.on('user-left', (user) => {
-        remoteUserMap.delete(user.uid);
-        removeParticipantCard('remote:' + user.uid);
-      });
-    }
 
     startCallBtn.addEventListener('click', joinAgora);
     testDeviceBtn.addEventListener('click', startDeviceTest);
