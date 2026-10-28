@@ -807,13 +807,14 @@
         const numericUid = /^\d+$/.test(rawUid) && Number(rawUid) > 0
           ? Number(rawUid)
           : Math.floor(100000 + Math.random() * 900000);
-        uidInput.value = String(numericUid);
+        const uidText = String(numericUid);
+        uidInput.value = uidText;
 
         let token = tokenRaw;
         let joinAppId = appId;
 
         if (!tokenRaw) {
-          const tokenData = await requestToken(channel, numericUid);
+          const tokenData = await requestToken(channel, uidText);
           token = tokenData.token;
           if (tokenData.appId) {
             joinAppId = tokenData.appId;
@@ -832,7 +833,7 @@
           throw new Error('Agora 尚未可用，請檢查 SDK 載入。');
         }
 
-        const joinedUid = await client.join(joinAppId, channel, token, numericUid);
+        const joinedUid = await client.join(joinAppId, channel, token, uidText);
         localParticipantId = 'local:' + joinedUid;
         const senderName = (unit && unit !== '-' ? unit : '訪客單位') + '#' + joinedUid;
         const localMediaPlayer = ensureParticipantCard(localParticipantId, '自己 UID：' + joinedUid, true);
