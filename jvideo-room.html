@@ -760,8 +760,8 @@
     }
 
     async function joinAgora() {
-      if (!client) {
-        showStatus('Agora 尚未可用，請檢查 SDK 載入。', true);
+      if (!window.AgoraRTC) {
+        showStatus('Agora SDK 載入失敗，請檢查網路或 CDN。', true);
         return;
       }
 
